@@ -116,9 +116,11 @@
     </div>
     <script>
         // Scene setup with improved far plane for better visibility
+        // Improved camera settings
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000);
+        camera.position.set(200, 200, 200);
+        camera.lookAt(0, 0, 0);
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
