@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Model</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-family: Arial, sans-serif;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        #planetInfo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-family: Arial, sans-serif;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 300px;
+        }
+        #legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-family: Arial, sans-serif;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <div class="slider-container">
+            <label for="timeSpeed">Time Speed (Earth days/second):</label>
+            <input type="range" id="timeSpeed" min="0" max="50" step="1" value="1">
+            <span id="timeSpeedValue">1</span>
+        </div>
+    </div>
+    <div id="planetInfo">Click on a planet or dwarf planet to see its information</div>
+    <div id="legend">
+        Inner Planets: Blue Orbits<br>
+        Outer Planets: Gold Orbits<br>
+        Dwarf Planets: White Orbits
+    </div>
+    <script>
+        // Scene setup with improved far plane for better visibility
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Enhanced lighting
+        const ambientLight = new THREE.AmbientLight(0x666666);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.PointLight(0xffffff, 2, 2000);
+        scene.add(sunLight);
+
+        // Updated planet data with enhanced outer planet sizes
+        const planetData = {
+            Mercury: { 
+                radius: 0.8, 
+                distance: 0.387, 
+                period: 88,
+                color: 0x8c8c8c,
+                orbitColor: 0x4169e1,
+                info: "Mercury - The smallest and innermost planet<br>Distance from Sun: 0.387 AU"
+            },
+            Venus: { 
+                radius: 1.5, 
+                distance: 0.723, 
+                period: 225,
+                color: 0xffd700,
+                orbitColor: 0x4169e1,
+                info: "Venus - The hottest planet in our solar system<br>Distance from Sun: 0.723 AU"
+            },
+            Earth: { 
+                radius: 1.6, 
+                distance: 1, 
+                period: 365,
+                color: 0x4169e1,
+                orbitColor: 0x4169e1,
+                info: "Earth - Our home planet<br>Distance from Sun: 1.0 AU"
+            },
+            Mars: { 
+                radius: 1.2, 
+                distance: 1.524, 
+                period: 687,
+                color: 0xff4500,
+                orbitColor: 0x4169e1,
+                info: "Mars - The Red Planet<br>Distance from Sun: 1.524 AU"
+            },
+            Jupiter: { 
+                radius: 6, 
+                distance: 5.203, 
+                period: 4333,
+                color: 0xffa500,
+                orbitColor: 0xffd700,
+                info: "Jupiter - The largest planet<br>Distance from Sun: 5.203 AU"
+            },
+            Saturn: { 
+                radius: 5, 
+                distance: 9.537, 
+                period: 10759,
+                color: 0xffd700,
+                orbitColor: 0xffd700,
+                info: "Saturn - Known for its rings<br>Distance from Sun: 9.537 AU"
+            },
+            Uranus: {
+                radius: 4,
+                distance: 19.191,
+                period: 30687,
+                color: 0x40e0d0,
+                orbitColor: 0xffd700,
+                info: "Uranus - The tilted planet<br>Distance from Sun: 19.191 AU"
+            },
+            Neptune: {
+                radius: 4,
+                distance: 30.069,
+                period: 60190,
+                color: 0x0000ff,
+                orbitColor: 0xffd700,
+                info: "Neptune - The windiest planet<br>Distance from Sun: 30.069 AU"
+            }
+        };
+
+        // Updated dwarf planet data
+        const dwarfPlanetData = {
+            Ceres: {
+                radius: 1,
+                distance: 2.767,
+                period: 1682,
+                color: 0x8b8989,
+                orbitColor: 0xffffff,
+                info: "Ceres - Largest asteroid belt object<br>Distance from Sun: 2.767 AU"
+            },
+            Pluto: {
+                radius: 1.2,
+                distance: 39.482,
+                period: 90560,
+                color: 0xd2691e,
+                orbitColor: 0xffffff,
+                info: "Pluto - Former ninth planet<br>Distance from Sun: 39.482 AU"
+            },
+            Eris: {
+                radius: 1.2,
+                distance: 67.781,
+                period: 203830,
+                color: 0xf5f5f5,
+                orbitColor: 0xffffff,
+                info: "Eris - Most massive dwarf planet<br>Distance from Sun: 67.781 AU"
+            },
+            Haumea: {
+                radius: 1,
+                distance: 43.335,
+                period: 104025,
+                color: 0xf0ffff,
+                orbitColor: 0xffffff,
+                info: "Haumea - Fast rotating dwarf planet<br>Distance from Sun: 43.335 AU"
+            },
+            Makemake: {
+                radius: 1,
+                distance: 45.791,
+                period: 111845,
+                color: 0xff8c69,
+                orbitColor: 0xffffff,
+                info: "Makemake - Kuiper belt dwarf planet<br>Distance from Sun: 45.791 AU"
+            }
+        };
+
+        // Create enhanced Sun
+        const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xffff00,
+            emissive: 0xffff00
+        });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        scene.add(sun);
+
+        // Enhanced belt creation function
+        const createBelt = (innerRadius, outerRadius, particleCount, color) => {
+            const particles = new THREE.BufferGeometry();
+            const positions = [];
+            
+            for(let i = 0; i < particleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = innerRadius + Math.random() * (outerRadius - innerRadius);
+                positions.push(
+                    Math.cos(angle) * distance * 20,
+                    (Math.random() - 0.5) * 4,
+                    Math.sin(angle) * distance * 20
+                );
+            }
+            
+            particles.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({
+                color: color,
+                size: 0.8,
+                transparent: true,
+                opacity: 0.4
+            });
+            
+            return new THREE.Points(particles, material);
+        };
+
+        // Add belts with increased particle count
+        const asteroidBelt = createBelt(2.2, 3.2, 15000, 0x666666);
+        scene.add(asteroidBelt);
+
+        const kuiperBelt = createBelt(30, 50, 20000, 0x444444);
+        scene.add(kuiperBelt);
+
+        // Create celestial bodies with enhanced visibility
+        const planets = {};
+        const orbits = {};
+
+        const createCelestialBodies = (bodyData) => {
+            for (const [name, data] of Object.entries(bodyData)) {
+                // Create body with glow effect for outer planets
+                const geometry = new THREE.SphereGeometry(data.radius, 32, 32);
+                const material = new THREE.MeshPhongMaterial({ 
+                    color: data.color,
+                    emissive: data.color,
+                    emissiveIntensity: 0.2
+                });
+                const body = new THREE.Mesh(geometry, material);
+                body.userData = { name, info: data.info };
+                planets[name] = body;
+                scene.add(body);
+
+                // Create enhanced orbit line
+                const orbitGeometry = new THREE.BufferGeometry();
+                const orbitPoints = [];
+                const segments = 256;
+                for (let i = 0; i <= segments; i++) {
+                    const theta = (i / segments) * Math.PI * 2;
+                    orbitPoints.push(
+                        Math.cos(theta) * data.distance * 20,
+                        0,
+                        Math.sin(theta) * data.distance * 20
+                    );
+                }
+                orbitGeometry.setAttribute('position', new THREE.Float32BufferAttribute(orbitPoints, 3));
+                const orbitMaterial = new THREE.LineBasicMaterial({ 
+                    color: data.orbitColor || 0x444444,
+                    linewidth: 1
+                });
+                const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
+                orbits[name] = orbit;
+                scene.add(orbit);
+            }
+        };
+
+        createCelestialBodies(planetData);
+        createCelestialBodies(dwarfPlanetData);
+
+        // Adjusted initial camera position for better overview
+        camera.position.set(100, 100, 100);
+        camera.lookAt(0, 0, 0);
+
+        let time = 0;
+        const timeSpeedSlider = document.getElementById('timeSpeed');
+        const timeSpeedValue = document.getElementById('timeSpeedValue');
+        const planetInfo = document.getElementById('planetInfo');
+
+        timeSpeedSlider.addEventListener('input', (e) => {
+            timeSpeedValue.textContent = e.target.value;
+        });
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        document.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(Object.values(planets));
+
+            if (intersects.length > 0) {
+                const planet = intersects[0].object;
+                planetInfo.innerHTML = planet.userData.info;
+            }
+        });
+
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let cameraAngle = { x: 0, y: 0 };
+        let cameraDistance = 200;
+
+        document.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const deltaMove = {
+                x: e.clientX - previousMousePosition.x,
+                y: e.clientY - previousMousePosition.y
+            };
+
+            cameraAngle.x += deltaMove.y * 0.01;
+            cameraAngle.y += deltaMove.x * 0.01;
+
+            cameraAngle.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngle.x));
+
+            updateCameraPosition();
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        document.addEventListener('wheel', (e) => {
+            cameraDistance = Math.max(30, Math.min(400, cameraDistance + e.deltaY * 0.1));
+            updateCameraPosition();
+        });
+
+        function updateCameraPosition() {
+            const x = cameraDistance * Math.cos(cameraAngle.x) * Math.sin(cameraAngle.y);
+            const y = cameraDistance * Math.sin(cameraAngle.x);
+            const z = cameraDistance * Math.cos(cameraAngle.x) * Math.cos(cameraAngle.y);
+
+            camera.position.set(x, y, z);
+            camera.lookAt(0, 0, 0);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            time += parseFloat(timeSpeedSlider.value);
+
+            const allBodies = { ...planetData, ...dwarfPlanetData };
+            for (const [name, data] of Object.entries(allBodies)) {
+                const angle = (time / data.period) * Math.PI * 2;
+                const distance = data.distance * 20;
+                
+                planets[name].position.x = Math.cos(angle) * distance;
+                planets[name].position.z = Math.sin(angle) * distance;
+                
+                planets[name].rotation.y += 0.01;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
