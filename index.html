@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar System Model</title>
+    <title>Enhanced Solar System Model</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: #000;
-        }
+        body { margin: 0; overflow: hidden; background: #000; }
         #controls {
             position: absolute;
             top: 20px;
@@ -22,12 +17,8 @@
             padding: 10px;
             border-radius: 5px;
         }
-        .slider-container {
-            margin: 10px 0;
-        }
-        input[type="range"] {
-            width: 200px;
-        }
+        .slider-container { margin: 10px 0; }
+        input[type="range"] { width: 200px; }
         #planetInfo {
             position: absolute;
             top: 20px;
@@ -49,6 +40,14 @@
             padding: 10px;
             border-radius: 5px;
         }
+        select {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            border: 1px solid white;
+            border-radius: 4px;
+            max-width: 250px;
+        }
     </style>
 </head>
 <body>
@@ -58,745 +57,256 @@
             <input type="range" id="timeSpeed" min="0" max="50" step="1" value="1">
             <span id="timeSpeedValue">1</span>
         </div>
-        <div class="dropdown-container" style="margin-top: 10px;">
+        <div class="dropdown-container">
             <label for="objectSelect">Focus on object:</label>
-            <select id="objectSelect" style="background: rgba(0, 0, 0, 0.7); color: white; padding: 5px; border: 1px solid white; border-radius: 4px;">
+            <select id="objectSelect">
                 <option value="">Select an object...</option>
                 <optgroup label="Sun">
                     <option value="Sun">Sun</option>
                 </optgroup>
-                <optgroup label="Inner Planets">
+                <optgroup label="Inner Planets & Moons">
                     <option value="Mercury">Mercury</option>
                     <option value="Venus">Venus</option>
                     <option value="Earth">Earth</option>
+                    <option value="Earth-Moon">Earth's Moon</option>
                     <option value="Mars">Mars</option>
+                    <option value="Mars-Phobos">Phobos</option>
+                    <option value="Mars-Deimos">Deimos</option>
                 </optgroup>
-                <optgroup label="Outer Planets">
+                <optgroup label="Outer Planets & Major Moons">
                     <option value="Jupiter">Jupiter</option>
+                    <option value="Jupiter-Io">Io</option>
+                    <option value="Jupiter-Europa">Europa</option>
+                    <option value="Jupiter-Ganymede">Ganymede</option>
+                    <option value="Jupiter-Callisto">Callisto</option>
                     <option value="Saturn">Saturn</option>
+                    <option value="Saturn-Titan">Titan</option>
+                    <option value="Saturn-Enceladus">Enceladus</option>
                     <option value="Uranus">Uranus</option>
+                    <option value="Uranus-Titania">Titania</option>
                     <option value="Neptune">Neptune</option>
+                    <option value="Neptune-Triton">Triton</option>
                 </optgroup>
                 <optgroup label="Dwarf Planets">
-                    <option value="Ceres">Ceres</option>
                     <option value="Pluto">Pluto</option>
+                    <option value="Ceres">Ceres</option>
                     <option value="Eris">Eris</option>
-                    <option value="Haumea">Haumea</option>
-                    <option value="Makemake">Makemake</option>
-                </optgroup>
-                <optgroup label="Trans-Neptunian Objects">
-                    <option value="Quaoar">Quaoar</option>
-                    <option value="Orcus">Orcus</option>
-                    <option value="Sedna">Sedna</option>
-                    <option value="Gonggong">Gonggong</option>
-                    <option value="Varuna">Varuna</option>
-                    <option value="Varda">Varda</option>
-                </optgroup>
-                <optgroup label="Regions">
-                    <option value="AsteroidBelt">Asteroid Belt</option>
-                    <option value="KuiperBelt">Kuiper Belt</option>
-                    <option value="OortCloud">Oort Cloud</option>
-                </optgroup>
-                <optgroup label="Space Probes">
-                    <option value="EuropaClipper">Europa Clipper</option>
-                    <option value="Perseverance">Perseverance Rover</option>
-                    <option value="OSIRIS_REx">OSIRIS-REx</option>
-                    <option value="JamesWebb">James Webb Telescope</option>
                 </optgroup>
             </select>
         </div>
     </div>
-    <div id="planetInfo">Click on a planet or dwarf planet to see its information</div>
+    <div id="planetInfo">Click on a celestial body to see its information</div>
     <div id="legend">
+        Sun: Yellow<br>
         Inner Planets: Blue Orbits<br>
         Outer Planets: Gold Orbits<br>
         Dwarf Planets: White Orbits<br>
-        Trans-Neptunian Objects: Gray Orbits<br>
-        Oort Cloud: Blue Haze (Distance Compressed)
+        Moons: Gray Orbits
     </div>
+
     <script>
-        // Scene setup with improved far plane for better visibility
-        // Improved camera settings
+        // Initialize Three.js scene
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000);
-        camera.position.set(200, 200, 200);
-        camera.lookAt(0, 0, 0);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Enhanced lighting
-        const ambientLight = new THREE.AmbientLight(0x666666);
-        scene.add(ambientLight);
+        // Initial camera setup
+        camera.position.set(200, 100, 200);
+        camera.lookAt(0, 0, 0);
 
-        const sunLight = new THREE.PointLight(0xffffff, 2, 2000);
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x333333);
+        scene.add(ambientLight);
+        
+        const sunLight = new THREE.PointLight(0xffffff, 2, 1000);
         scene.add(sunLight);
 
-        // Updated planet data with enhanced outer planet sizes
-        // Space probe data
-        const probeData = {
-            EuropaClipper: {
-                target: 'Jupiter',
-                color: 0x00ffff,
-                launchDate: '2024',
-                info: "NASA's Europa Clipper<br>• Launch: October 2024<br>• Arrival: 2030<br>• Mission: Study Europa's potential for life<br>• Type: Jupiter/Europa orbiter<br>• Will perform 50+ flybys of Europa",
-                trajectory: [
-                    {type: 'launch', body: 'Earth'},
-                    {type: 'gravity_assist', body: 'Mars'},
-                    {type: 'gravity_assist', body: 'Earth'},
-                    {type: 'destination', body: 'Jupiter'}
-                ]
-            },
-            Perseverance: {
-                target: 'Mars',
-                color: 0xff0000,
-                launchDate: '2020',
-                info: "NASA's Perseverance Rover<br>• Launched: July 30, 2020<br>• Landing: February 18, 2021<br>• Mission: Search for signs of ancient microbial life<br>• Location: Jezero Crater, Mars",
-                trajectory: []
-            },
-            OSIRIS_REx: {
-                target: 'Bennu',
-                color: 0x00ff00,
-                launchDate: '2016',
-                info: "OSIRIS-REx<br>• Launched: September 8, 2016<br>• Sample Return: September 24, 2023<br>• Mission: Asteroid sample return<br>• Target: Asteroid Bennu",
-                trajectory: []
-            },
-            JamesWebb: {
-                target: 'L2',
-                color: 0xffff00,
-                launchDate: '2021',
-                info: "James Webb Space Telescope<br>• Launched: December 25, 2021<br>• Location: L2 Lagrange Point<br>• Mission: Observe distant universe<br>• Type: Infrared telescope",
-                trajectory: []
-            }
-        };
-
-        const planetData = {
-            Mercury: { 
-                radius: 0.8, 
-                distance: 0.387, 
-                period: 88,
-                color: 0x8c8c8c,
-                orbitColor: 0x4169e1,
-                info: "Mercury - The Innermost Planet<br>• Distance from Sun: 0.387 AU<br>• Diameter: 4,879 km<br>• Surface temperature: -180°C to 430°C<br>• Fun fact: Despite being closest to the Sun, it's not the hottest planet!"
-            },
-            Venus: { 
-                radius: 1.5, 
-                distance: 0.723, 
-                period: 225,
-                color: 0xffd700,
-                orbitColor: 0x4169e1,
-                info: "Venus - The Hottest Planet<br>• Distance from Sun: 0.723 AU<br>• Diameter: 12,104 km<br>• Surface temperature: 462°C<br>• Fun fact: It rotates backwards compared to most other planets!"
-            },
-            Earth: { 
-                radius: 1.6, 
-                distance: 1, 
-                period: 365,
-                color: 0x4169e1,
-                orbitColor: 0x4169e1,
-                info: "Earth - Our Home Planet<br>• Distance from Sun: 1.0 AU<br>• Diameter: 12,742 km<br>• Surface temperature: -88°C to 58°C<br>• Fun fact: Earth is the only planet known to have liquid water on its surface!"
-            },
-            Mars: { 
-                radius: 1.2, 
-                distance: 1.524, 
-                period: 687,
-                color: 0xff4500,
-                orbitColor: 0x4169e1,
-                info: "Mars - The Red Planet<br>• Distance from Sun: 1.524 AU<br>• Diameter: 6,779 km<br>• Surface temperature: -140°C to 20°C<br>• Fun fact: Mars has the largest volcano in the solar system - Olympus Mons!"
-            },
-            Jupiter: { 
-                radius: 6, 
-                distance: 5.203, 
-                period: 4333,
-                color: 0xffa500,
-                orbitColor: 0xffd700,
-                info: "Jupiter - The Giant Planet<br>• Distance from Sun: 5.203 AU<br>• Diameter: 139,820 km<br>• Surface temperature: -110°C<br>• Fun fact: Jupiter's Great Red Spot is a storm that has been raging for at least 400 years!"
-            },
-            Saturn: { 
-                radius: 5, 
-                distance: 9.537, 
-                period: 10759,
-                color: 0xffd700,
-                orbitColor: 0xffd700,
-                info: "Saturn - Lord of the Rings<br>• Distance from Sun: 9.537 AU<br>• Diameter: 116,460 km<br>• Surface temperature: -140°C<br>• Fun fact: Saturn's rings are mostly made of ice and rock, and some are as thin as 10 meters!"
-            },
-            Uranus: {
-                radius: 4,
-                distance: 19.191,
-                period: 30687,
-                color: 0x40e0d0,
-                orbitColor: 0xffd700,
-                info: "Uranus - The Tilted Planet<br>• Distance from Sun: 19.191 AU<br>• Diameter: 50,724 km<br>• Surface temperature: -195°C<br>• Fun fact: Uranus rotates on its side, likely due to a massive impact early in its history!"
-            },
-            Neptune: {
-                radius: 4,
-                distance: 30.069,
-                period: 60190,
-                color: 0x0000ff,
-                orbitColor: 0xffd700,
-                info: "Neptune - The Windiest Planet<br>• Distance from Sun: 30.069 AU<br>• Diameter: 49,244 km<br>• Surface temperature: -200°C<br>• Fun fact: Neptune's winds can reach speeds of 2,100 km/hour, the fastest in the solar system!"
-            }
-        };
-
-        // Updated dwarf planet data
-        // Trans-Neptunian Objects data
-        const tnoData = {
-            Quaoar: {
-                radius: 1.1,
-                distance: 43.3,
-                period: 104250,
-                color: 0x8B4513,
-                orbitColor: 0x555555,
-                info: "Quaoar<br>• Distance from Sun: 43.3 AU<br>• Diameter: ~1,110 km<br>• Discovery: 2002<br>• Fun fact: Has a small moon called Weywot"
-            },
-            Orcus: {
-                radius: 1.1,
-                distance: 39.2,
-                period: 89557,
-                color: 0x808080,
-                orbitColor: 0x555555,
-                info: "Orcus<br>• Distance from Sun: 39.2 AU<br>• Diameter: ~910 km<br>• Discovery: 2004<br>• Fun fact: Often called the anti-Pluto due to its similar but opposite orbit"
-            },
-            Sedna: {
-                radius: 1.2,
-                distance: 525.9,
-                period: 11400000,
-                color: 0x8B0000,
-                orbitColor: 0x555555,
-                info: "Sedna<br>• Distance from Sun: 525.9 AU<br>• Diameter: ~1,000 km<br>• Discovery: 2003<br>• Fun fact: One of the most distant known objects in the solar system"
-            },
-            Gonggong: {
-                radius: 1.2,
-                distance: 67.4,
-                period: 201775,
-                color: 0xA0522D,
-                orbitColor: 0x555555,
-                info: "Gonggong<br>• Distance from Sun: 67.4 AU<br>• Diameter: ~1,230 km<br>• Discovery: 2007<br>• Fun fact: Named after a Chinese water god"
-            },
-            Varuna: {
-                radius: 0.9,
-                distance: 43.1,
-                period: 103440,
-                color: 0x4A4A4A,
-                orbitColor: 0x555555,
-                info: "Varuna<br>• Distance from Sun: 43.1 AU<br>• Diameter: ~900 km<br>• Discovery: 2000<br>• Fun fact: Known for its rapid rotation"
-            },
-            Varda: {
-                radius: 0.9,
-                distance: 45.6,
-                period: 112897,
-                color: 0x696969,
-                orbitColor: 0x555555,
-                info: "Varda<br>• Distance from Sun: 45.6 AU<br>• Diameter: ~700 km<br>• Discovery: 2003<br>• Fun fact: Named after the queen of the Valar in Tolkien's mythology"
-            }
-        };
-
-        const dwarfPlanetData = {
-            Ceres: {
-                radius: 1,
-                distance: 2.767,
-                period: 1682,
-                color: 0x8b8989,
-                orbitColor: 0xffffff,
-                info: "Ceres - Queen of the Asteroid Belt<br>• Distance from Sun: 2.767 AU<br>• Diameter: 940 km<br>• Surface temperature: -38°C<br>• Fun fact: Ceres contains about one-third of all the mass in the asteroid belt!"
-            },
-            Pluto: {
-                radius: 1.2,
-                distance: 39.482,
-                period: 90560,
-                color: 0xd2691e,
-                orbitColor: 0xffffff,
-                info: "Pluto - The Famous Dwarf Planet<br>• Distance from Sun: 39.482 AU<br>• Diameter: 2,377 km<br>• Surface temperature: -230°C<br>• Fun fact: Pluto was considered a planet from 1930 to 2006. It has 5 known moons!"
-            },
-            Eris: {
-                radius: 1.2,
-                distance: 67.781,
-                period: 203830,
-                color: 0xf5f5f5,
-                orbitColor: 0xffffff,
-                info: "Eris - Most massive dwarf planet<br>Distance from Sun: 67.781 AU"
-            },
-            Haumea: {
-                radius: 1,
-                distance: 43.335,
-                period: 104025,
-                color: 0xf0ffff,
-                orbitColor: 0xffffff,
-                info: "Haumea - Fast rotating dwarf planet<br>Distance from Sun: 43.335 AU"
-            },
-            Makemake: {
-                radius: 1,
-                distance: 45.791,
-                period: 111845,
-                color: 0xff8c69,
-                orbitColor: 0xffffff,
-                info: "Makemake - Kuiper belt dwarf planet<br>Distance from Sun: 45.791 AU"
-            }
-        };
-
-        // Create Oort Cloud
-        const createOortCloud = () => {
-            const particleCount = 30000;
-            const particles = new THREE.BufferGeometry();
-            const positions = [];
-            
-            // Create spherical shell of particles
-            for(let i = 0; i < particleCount; i++) {
-                // Spherical coordinates
-                const phi = Math.random() * Math.PI * 2;
-                const costheta = Math.random() * 2 - 1;
-                const theta = Math.acos(costheta);
-                
-                // Random radius between inner and outer Oort cloud (2000-100000 AU scaled down)
-                const r = (2000 + Math.random() * 98000) * 0.2; // Scaled down for visualization
-                
-                positions.push(
-                    r * Math.sin(theta) * Math.cos(phi),
-                    r * Math.sin(theta) * Math.sin(phi),
-                    r * Math.cos(theta)
-                );
-            }
-            
-            particles.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-            const material = new THREE.PointsMaterial({
-                color: 0x2244aa,
-                size: 2,
-                transparent: true,
-                opacity: 0.3,
-                sizeAttenuation: true
-            });
-            
-            const oortCloud = new THREE.Points(particles, material);
-            oortCloud.userData = {
-                info: "The Oort Cloud<br>• Distance: 2,000-100,000 AU from Sun<br>• Contains: Trillions of icy objects<br>• Size: Marks the edge of Sun's gravitational influence<br>• Fun fact: Source of many long-period comets<br>• Note: Scale compressed for visualization"
-            };
-            return oortCloud;
-        };
-
-        const oortCloud = createOortCloud();
-        scene.add(oortCloud);
-
-        // Create enhanced Sun
-        const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
-        const sunMaterial = new THREE.MeshBasicMaterial({ 
+        // Create Sun
+        const sunGeometry = new THREE.SphereGeometry(8, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({
             color: 0xffff00,
-            emissive: 0xffff00
+            emissive: 0xffff00,
+            emissiveIntensity: 1
         });
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-        sun.userData = {
-            info: "The Sun - Our Star<br>• Distance from Earth: 1 AU (150 million km)<br>• Diameter: 1.39 million km<br>• Surface temperature: 5,500°C<br>• Core temperature: 15 million°C<br>• Fun fact: The Sun contains 99.86% of all mass in the solar system!"
+        sun.userData = { 
+            name: "Sun",
+            info: "Sun - Our Star<br>• Distance: 0 AU<br>• Diameter: 1,392,700 km<br>• Fun fact: Contains 99.86% of the solar system's mass"
         };
         scene.add(sun);
 
-        // Enhanced belt creation function
-        const createBelt = (innerRadius, outerRadius, particleCount, color) => {
-            const particles = new THREE.BufferGeometry();
-            const positions = [];
-            
-            for(let i = 0; i < particleCount; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const distance = innerRadius + Math.random() * (outerRadius - innerRadius);
-                positions.push(
-                    Math.cos(angle) * distance * 20,
-                    (Math.random() - 0.5) * 4,
-                    Math.sin(angle) * distance * 20
-                );
-            }
-            
-            particles.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-            const material = new THREE.PointsMaterial({
-                color: color,
-                size: 0.8,
-                transparent: true,
-                opacity: 0.4
-            });
-            
-            const belt = new THREE.Points(particles, material);
-            belt.userData = { isBelt: true };
-            return belt;
-        };
-
-        // Add belts with increased particle count
-        const asteroidBelt = createBelt(2.2, 3.2, 15000, 0x666666);
-        asteroidBelt.userData.info = "The Asteroid Belt<br>• Location: Between Mars and Jupiter (2.2-3.2 AU)<br>• Contains: Over 1 million known asteroids<br>• Largest object: Ceres (940 km diameter)<br>• Fun fact: The total mass of all asteroids is less than that of Earth's Moon!";
-        scene.add(asteroidBelt);
-
-        const kuiperBelt = createBelt(30, 50, 20000, 0x444444);
-        kuiperBelt.userData.info = "The Kuiper Belt<br>• Location: Beyond Neptune (30-50 AU)<br>• Contains: Over 100,000 objects > 100km<br>• Notable objects: Pluto, Eris, Makemake<br>• Fun fact: This region contains many icy bodies and comets from the early solar system!";
-        scene.add(kuiperBelt);
-
-        // Create celestial bodies with enhanced visibility
-        const planets = {};
-        const orbits = {};
-
-        const createCelestialBodies = (bodyData) => {
-            for (const [name, data] of Object.entries(bodyData)) {
-                // Create body with glow effect for outer planets
-                const geometry = new THREE.SphereGeometry(data.radius, 32, 32);
-                const material = new THREE.MeshPhongMaterial({ 
-                    color: data.color,
-                    emissive: data.color,
-                    emissiveIntensity: 0.2
-                });
-                const body = new THREE.Mesh(geometry, material);
-                body.userData = { name, info: data.info };
-                planets[name] = body;
-                scene.add(body);
-
-                // Create enhanced orbit line
-                const orbitGeometry = new THREE.BufferGeometry();
-                const orbitPoints = [];
-                const segments = 256;
-                for (let i = 0; i <= segments; i++) {
-                    const theta = (i / segments) * Math.PI * 2;
-                    orbitPoints.push(
-                        Math.cos(theta) * data.distance * 20,
-                        0,
-                        Math.sin(theta) * data.distance * 20
-                    );
-                }
-                orbitGeometry.setAttribute('position', new THREE.Float32BufferAttribute(orbitPoints, 3));
-                const orbitMaterial = new THREE.LineBasicMaterial({ 
-                    color: data.orbitColor || 0x444444,
-                    linewidth: 1
-                });
-                const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
-                orbit.userData = { 
-                    isOrbit: true,
-                    associatedBody: name,
-                    info: data.info 
-                };
-                orbits[name] = orbit;
-                scene.add(orbit);
-            }
-        };
-
-        createCelestialBodies(planetData);
-        createCelestialBodies(dwarfPlanetData);
-        createCelestialBodies(tnoData);
-
-        // Create moons for each planet
-        Object.entries(moonData).forEach(([planetName, moons]) => {
-            createMoons(planetName, moons);
-        });
-
-        // Create space probes
-        const probes = {};
-        const createProbe = (name, data) => {
-            const geometry = new THREE.ConeGeometry(0.5, 2, 8);
-            const material = new THREE.MeshPhongMaterial({
-                color: data.color,
-                emissive: data.color,
-                emissiveIntensity: 0.3
-            });
-            const probe = new THREE.Mesh(geometry, material);
-            probe.userData = { 
-                isProbe: true,
-                name: name,
-                info: data.info,
-                target: data.target,
-                launched: false
-            };
-            probe.scale.set(0.5, 0.5, 0.5);
-            probes[name] = probe;
-            scene.add(probe);
-
-            // Position probe near Earth initially
-            probe.position.set(planets['Earth'].position.x + 2, 2, planets['Earth'].position.z + 2);
-        };
-
-        Object.entries(probeData).forEach(([name, data]) => createProbe(name, data));
-
-        // Function to launch probe with trajectory
-        const launchProbe = (probeName) => {
-            const probe = probes[probeName];
-            if (!probe.userData.launched) {
-                probe.userData.launched = true;
-                const target = probe.userData.target;
-                const trajectoryPoints = [];
-                const startPos = probe.position.clone();
-
-                // Special handling for Clipper's complex trajectory
-                if (probeName === 'EuropaClipper') {
-                    const animate = () => {
-                        if (probe.userData.launched) {
-                            const time = Date.now() * 0.001;
-                            // Complex trajectory calculation with gravity assists
-                            const path = calculateClipperPath(time);
-                            probe.position.copy(path);
-                            
-                            // Update trajectory line
-                            trajectoryPoints.push(probe.position.clone());
-                            const trajectoryGeometry = new THREE.BufferGeometry().setFromPoints(trajectoryPoints);
-                            probe.userData.trajectoryLine.geometry.dispose();
-                            probe.userData.trajectoryLine.geometry = trajectoryGeometry;
-                            
-                            // Rotate probe to face direction of travel
-                            if (trajectoryPoints.length > 1) {
-                                const direction = trajectoryPoints[trajectoryPoints.length - 1]
-                                    .clone()
-                                    .sub(trajectoryPoints[trajectoryPoints.length - 2]);
-                                probe.lookAt(probe.position.clone().add(direction));
-                            }
-                            
-                            requestAnimationFrame(animate);
-                        }
-                    };
-                    animate();
-                } else {
-                    // Original probe animation code
-                    const animate = () => {
-                        if (probe.userData.launched) {
-                            let targetPos;
-                            if (target in planets) {
-                                targetPos = planets[target].position;
-                            } else if (target === 'L2') {
-                                targetPos = new THREE.Vector3(150, 0, 0);
-                            }
-
-                            if (targetPos) {
-                                const direction = new THREE.Vector3();
-                                direction.subVectors(targetPos, probe.position);
-                                direction.normalize();
-                                probe.position.add(direction.multiplyScalar(0.5));
-                                
-                                trajectoryPoints.push(probe.position.clone());
-                                const trajectoryGeometry = new THREE.BufferGeometry().setFromPoints(trajectoryPoints);
-                                probe.userData.trajectoryLine.geometry.dispose();
-                                probe.userData.trajectoryLine.geometry = trajectoryGeometry;
-                                
-                                probe.lookAt(targetPos);
-                                
-                                const pulseScale = 1 + 0.2 * Math.sin(Date.now() * 0.005);
-                                probe.children[1].scale.set(pulseScale, pulseScale, pulseScale);
-                            }
-                            requestAnimationFrame(animate);
-                        }
-                    };
-                    animate();
-                }
-            }
-        };
-
-        // Calculate Clipper's complex trajectory
-        const calculateClipperPath = (time) => {
-            const t = time * 0.1; // Slow down the animation
-            const position = new THREE.Vector3();
-            
-            // Earth orbit radius
-            const earthRadius = planets['Earth'].position.length();
-            // Mars orbit radius
-            const marsRadius = planets['Mars'].position.length();
-            // Jupiter orbit radius
-            const jupiterRadius = planets['Jupiter'].position.length();
-            
-            // Phase of trajectory (0-1)
-            const phase = (t % 10) / 10;
-            
-            if (phase < 0.2) { // Launch from Earth
-                const p = phase / 0.2;
-                position.x = earthRadius * Math.cos(t);
-                position.z = earthRadius * Math.sin(t);
-                position.y = p * 5; // Rising up from Earth
-            } else if (phase < 0.4) { // To Mars
-                const p = (phase - 0.2) / 0.2;
-                const radius = earthRadius + (marsRadius - earthRadius) * p;
-                position.x = radius * Math.cos(t * 0.8);
-                position.z = radius * Math.sin(t * 0.8);
-                position.y = 5 * (1 - p); // Coming back to orbital plane
-            } else if (phase < 0.6) { // Mars gravity assist
-                const p = (phase - 0.4) / 0.2;
-                const radius = marsRadius;
-                position.x = radius * Math.cos(t * 0.6);
-                position.z = radius * Math.sin(t * 0.6);
-                position.y = p * 8; // Gravity assist boost
-            } else if (phase < 1) { // To Jupiter
-                const p = (phase - 0.6) / 0.4;
-                const radius = marsRadius + (jupiterRadius - marsRadius) * p;
-                position.x = radius * Math.cos(t * 0.4);
-                position.z = radius * Math.sin(t * 0.4);
-                position.y = 8 * (1 - p); // Settling into Jupiter orbit
-            }
-            
-            return position;
-        };
-
-        // Adjusted initial camera position for better overview
-        camera.position.set(100, 100, 100);
-        camera.lookAt(0, 0, 0);
-
-        // Function to focus camera on an object
-        const focusOnObject = (objectName) => {
-            let targetObject;
-            if (objectName === 'Sun') {
-                targetObject = sun;
-            } else if (objectName in planets) {
-                targetObject = planets[objectName];
-            } else if (objectName === 'OortCloud') {
-                targetObject = oortCloud;
-                // Special handling for Oort Cloud zoom
-                const position = new THREE.Vector3(0, 1000, 1000);
-                camera.position.copy(position);
-                camera.lookAt(new THREE.Vector3(0, 0, 0));
-                return;
-            } else if (objectName === 'AsteroidBelt') {
-                targetObject = asteroidBelt;
-            } else if (objectName === 'KuiperBelt') {
-                targetObject = kuiperBelt;
-            }
-
-            if (targetObject) {
-                const position = new THREE.Vector3();
-                targetObject.getWorldPosition(position);
-                
-                // Calculate appropriate distance based on object size
-                const objectRadius = targetObject.geometry.parameters.radius || 1;
-                const desiredDistance = objectRadius * 20;
-                
-                // Smoothly animate camera
-                const startPosition = camera.position.clone();
-                const endPosition = position.clone().add(new THREE.Vector3(desiredDistance, desiredDistance, desiredDistance));
-                
-                const animate = (progress) => {
-                    if (progress >= 1) {
-                        camera.position.copy(endPosition);
-                        camera.lookAt(position);
-                        return;
+        // Planet and moon data
+        const celestialData = {
+            Mercury: {
+                radius: 0.8,
+                distance: 10,
+                period: 88,
+                color: 0x8c8c8c,
+                orbitColor: 0x4169e1,
+                info: "Mercury - Innermost Planet<br>• Distance: 0.387 AU<br>• Diameter: 4,879 km<br>• Fun fact: Despite being closest to Sun, not the hottest",
+                moons: {}
+            },
+            Venus: {
+                radius: 1.5,
+                distance: 15,
+                period: 225,
+                color: 0xffd700,
+                orbitColor: 0x4169e1,
+                info: "Venus - The Hot Planet<br>• Distance: 0.723 AU<br>• Diameter: 12,104 km<br>• Fun fact: Rotates backwards",
+                moons: {}
+            },
+            Earth: {
+                radius: 1.6,
+                distance: 20,
+                period: 365,
+                color: 0x4169e1,
+                orbitColor: 0x4169e1,
+                info: "Earth - Our Home<br>• Distance: 1.0 AU<br>• Diameter: 12,742 km<br>• Fun fact: Only known planet with life",
+                moons: {
+                    "Earth-Moon": {
+                        radius: 0.4,
+                        distance: 3,
+                        period: 27.3,
+                        color: 0xcccccc,
+                        orbitColor: 0x666666,
+                        info: "Moon - Earth's Only Natural Satellite<br>• Distance: 384,400 km<br>• Diameter: 3,475 km<br>• Fun fact: Same side always faces Earth"
                     }
-                    
-                    // Smooth easing
-                    const easedProgress = 1 - Math.pow(1 - progress, 3);
-                    
-                    camera.position.lerpVectors(startPosition, endPosition, easedProgress);
-                    camera.lookAt(position);
-                    
-                    requestAnimationFrame(() => animate(progress + 0.02));
-                };
-                
-                animate(0);
-            }
-        };
-
-        // Add dropdown event listener
-        document.getElementById('objectSelect').addEventListener('change', (e) => {
-            if (e.target.value) {
-                // Launch Europa Clipper if selected
-                if (e.target.value === 'EuropaClipper') {
-                    focusOnObject(e.target.value);
-                    if (!probes['EuropaClipper'].userData.launched) {
-                        launchProbe('EuropaClipper');
-                    }
-                } else {
-                    focusOnObject(e.target.value);
                 }
-            }
-        });
-
-        let time = 0;
-        const timeSpeedSlider = document.getElementById('timeSpeed');
-        const timeSpeedValue = document.getElementById('timeSpeedValue');
-        const planetInfo = document.getElementById('planetInfo');
-
-        timeSpeedSlider.addEventListener('input', (e) => {
-            timeSpeedValue.textContent = e.target.value;
-        });
-
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        document.addEventListener('click', (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            const allClickableObjects = [sun, asteroidBelt, kuiperBelt, oortCloud, ...Object.values(planets), ...Object.values(probes), ...Object.values(orbits)];
-            const intersects = raycaster.intersectObjects(allClickableObjects);
-
-            if (intersects.length > 0) {
-                const planet = intersects[0].object;
-                planetInfo.innerHTML = planet.userData.info;
-                
-                // Launch probe if clicked
-                if (planet.userData.isProbe) {
-                    if (!planet.userData.launched) {
-                        planetInfo.innerHTML += "<br><br>Click again to launch!";
-                    } else {
-                        planetInfo.innerHTML += "<br><br>Probe is in transit!";
+            },
+            Mars: {
+                radius: 1.2,
+                distance: 30,
+                period: 687,
+                color: 0xff4500,
+                orbitColor: 0x4169e1,
+                info: "Mars - The Red Planet<br>• Distance: 1.524 AU<br>• Diameter: 6,779 km<br>• Fun fact: Has the largest known volcano",
+                moons: {
+                    "Mars-Phobos": {
+                        radius: 0.2,
+                        distance: 2,
+                        period: 0.3,
+                        color: 0x8b4513,
+                        orbitColor: 0x666666,
+                        info: "Phobos - Mars's Larger Moon<br>• Distance: 9,377 km<br>• Diameter: 22.2 km<br>• Fun fact: Getting closer to Mars each year"
+                    },
+                    "Mars-Deimos": {
+                        radius: 0.15,
+                        distance: 2.5,
+                        period: 1.2,
+                        color: 0x8b4513,
+                        orbitColor: 0x666666,
+                        info: "Deimos - Mars's Smaller Moon<br>• Distance: 23,460 km<br>• Diameter: 12.6 km<br>• Fun fact: Takes 30 hours to orbit Mars"
                     }
-                    launchProbe(planet.userData.name);
                 }
-            }
-        });
-
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-        let cameraAngle = { x: 0, y: 0 };
-        let cameraDistance = 200;
-
-        document.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            previousMousePosition = { x: e.clientX, y: e.clientY };
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-
-            const deltaMove = {
-                x: e.clientX - previousMousePosition.x,
-                y: e.clientY - previousMousePosition.y
-            };
-
-            cameraAngle.x += deltaMove.y * 0.01;
-            cameraAngle.y += deltaMove.x * 0.01;
-
-            cameraAngle.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngle.x));
-
-            updateCameraPosition();
-            previousMousePosition = { x: e.clientX, y: e.clientY };
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        document.addEventListener('wheel', (e) => {
-            cameraDistance = Math.max(30, Math.min(2000, cameraDistance + e.deltaY * 0.5));
-            updateCameraPosition();
-        });
-
-        function updateCameraPosition() {
-            const x = cameraDistance * Math.cos(cameraAngle.x) * Math.sin(cameraAngle.y);
-            const y = cameraDistance * Math.sin(cameraAngle.x);
-            const z = cameraDistance * Math.cos(cameraAngle.x) * Math.cos(cameraAngle.y);
-
-            camera.position.set(x, y, z);
-            camera.lookAt(0, 0, 0);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            time += parseFloat(timeSpeedSlider.value);
-
-            const allBodies = { ...planetData, ...dwarfPlanetData };
-            for (const [name, data] of Object.entries(allBodies)) {
-                const angle = (time / data.period) * Math.PI * 2;
-                const distance = data.distance * 20;
-                
-                planets[name].position.x = Math.cos(angle) * distance;
-                planets[name].position.z = Math.sin(angle) * distance;
-                
-                planets[name].rotation.y += 0.01;
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        animate();
-    </script>
-</body>
-</html>
+            },
+            Jupiter: {
+                radius: 4.0,
+                distance: 50,
+                period: 4333,
+                color: 0xffa500,
+                orbitColor: 0xffd700,
+                info: "Jupiter - The Giant<br>• Distance: 5.203 AU<br>• Diameter: 139,820 km<br>• Fun fact: Has a permanent storm larger than Earth",
+                moons: {
+                    "Jupiter-Io": {
+                        radius: 0.5,
+                        distance: 5,
+                        period: 1.8,
+                        color: 0xfffacd,
+                        orbitColor: 0x666666,
+                        info: "Io - Most Volcanic Moon<br>• Distance: 421,700 km<br>• Diameter: 3,642 km<br>• Fun fact: Has over 400 active volcanoes"
+                    },
+                    "Jupiter-Europa": {
+                        radius: 0.45,
+                        distance: 6,
+                        period: 3.5,
+                        color: 0xf5f5dc,
+                        orbitColor: 0x666666,
+                        info: "Europa - Ice Moon<br>• Distance: 670,900 km<br>• Diameter: 3,122 km<br>• Fun fact: Has a subsurface ocean"
+                    },
+                    "Jupiter-Ganymede": {
+                        radius: 0.7,
+                        distance: 7,
+                        period: 7.2,
+                        color: 0xd3d3d3,
+                        orbitColor: 0x666666,
+                        info: "Ganymede - Largest Moon<br>• Distance: 1,070,400 km<br>• Diameter: 5,268 km<br>• Fun fact: Larger than Mercury"
+                    },
+                    "Jupiter-Callisto": {
+                        radius: 0.65,
+                        distance: 8,
+                        period: 16.7,
+                        color: 0x808080,
+                        orbitColor: 0x666666,
+                        info: "Callisto - Heavily Cratered Moon<br>• Distance: 1,882,700 km<br>• Diameter: 4,821 km<br>• Fun fact: Most heavily cratered object in solar system"
+                    }
+                }
+            },
+            Saturn: {
+                radius: 3.5,
+                distance: 70,
+                period: 10759,
+                color: 0xffd700,
+                orbitColor: 0xffd700,
+                info: "Saturn - The Ringed Planet<br>• Distance: 9.537 AU<br>• Diameter: 116,460 km<br>• Fun fact: Could float in a giant bathtub",
+                moons: {
+                    "Saturn-Titan": {
+                        radius: 0.8,
+                        distance: 9,
+                        period: 15.9,
+                        color: 0xd2b48c,
+                        orbitColor: 0x666666,
+                        info: "Titan - Largest Saturn Moon<br>• Distance: 1,221,870 km<br>• Diameter: 5,150 km<br>• Fun fact: Only moon with thick atmosphere"
+                    },
+                    "Saturn-Enceladus": {
+                        radius: 0.3,
+                        distance: 6,
+                        period: 1.4,
+                        color: 0xfffafa,
+                        orbitColor: 0x666666,
+                        info: "Enceladus - Ice Geyser Moon<br>• Distance: 238,020 km<br>• Diameter: 504 km<br>• Fun fact: Has ice geysers at south pole"
+                    }
+                }
+            },
+            Uranus: {
+                radius: 3.0,
+                distance: 90,
+                period: 30687,
+                color: 0x40e0d0,
+                orbitColor: 0xffd700,
+                info: "Uranus - The Sideways Planet<br>• Distance: 19.191 AU<br>• Diameter: 50,724 km<br>• Fun fact: Rotates on its side",
+                moons: {
+                    "Uranus-Titania": {
+                        radius: 0.4,
+                        distance: 5,
+                        period: 8.7,
+                        color: 0xa9a9a9,
+                        orbitColor: 0x666666,
+                        info: "Titania - Largest Uranus Moon<br>• Distance: 435,910 km<br>• Diameter: 1,578 km<br>• Fun fact: Has a system of canyons"
+                    }
+                }
+            },
+            Neptune: {
+                radius: 3.0,
+                distance: 110,
+                period: 60190,
+                color: 0x0000ff,
+                orbitColor: 0xffd700,
+                info: "Neptune - The Windy Planet<br>• Distance: 30.069 AU<br>• Diameter: 49,244 km<br>• Fun fact: Fastest winds in the solar system",
+                moons: {
+                    "Neptune-Triton": {
+                        radius: 0.5,
+                        distance: 6,
+                        period: -5.9,
+                        color: 0xe6e6fa,
+                        orbitColor: 0x666666,
+                        info: "Triton - Backwards Moon<br>• Distance: 354,760 km<br>• Diameter: 2,707 km<br>• Fun fact: Orbits backwards around Neptune"
+                    }
+                }
+            },
+            Pluto: {
+                radius: 0.4,
+                distance: 130,
+                period: 90560
