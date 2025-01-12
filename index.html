@@ -58,6 +58,39 @@
             <input type="range" id="timeSpeed" min="0" max="50" step="1" value="1">
             <span id="timeSpeedValue">1</span>
         </div>
+        <div class="dropdown-container" style="margin-top: 10px;">
+            <label for="objectSelect">Focus on object:</label>
+            <select id="objectSelect" style="background: rgba(0, 0, 0, 0.7); color: white; padding: 5px; border: 1px solid white; border-radius: 4px;">
+                <option value="">Select an object...</option>
+                <optgroup label="Sun">
+                    <option value="Sun">Sun</option>
+                </optgroup>
+                <optgroup label="Inner Planets">
+                    <option value="Mercury">Mercury</option>
+                    <option value="Venus">Venus</option>
+                    <option value="Earth">Earth</option>
+                    <option value="Mars">Mars</option>
+                </optgroup>
+                <optgroup label="Outer Planets">
+                    <option value="Jupiter">Jupiter</option>
+                    <option value="Saturn">Saturn</option>
+                    <option value="Uranus">Uranus</option>
+                    <option value="Neptune">Neptune</option>
+                </optgroup>
+                <optgroup label="Dwarf Planets">
+                    <option value="Ceres">Ceres</option>
+                    <option value="Pluto">Pluto</option>
+                    <option value="Eris">Eris</option>
+                    <option value="Haumea">Haumea</option>
+                    <option value="Makemake">Makemake</option>
+                </optgroup>
+                <optgroup label="Space Probes">
+                    <option value="Perseverance">Perseverance Rover</option>
+                    <option value="OSIRIS_REx">OSIRIS-REx</option>
+                    <option value="JamesWebb">James Webb Telescope</option>
+                </optgroup>
+            </select>
+        </div>
     </div>
     <div id="planetInfo">Click on a planet or dwarf planet to see its information</div>
     <div id="legend">
@@ -302,6 +335,11 @@
                     linewidth: 1
                 });
                 const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
+                orbit.userData = { 
+                    isOrbit: true,
+                    associatedBody: name,
+                    info: data.info 
+                };
                 orbits[name] = orbit;
                 scene.add(orbit);
             }
@@ -377,6 +415,56 @@
         camera.position.set(100, 100, 100);
         camera.lookAt(0, 0, 0);
 
+        // Function to focus camera on an object
+        const focusOnObject = (objectName) => {
+            let targetObject;
+            if (objectName === 'Sun') {
+                targetObject = sun;
+            } else if (objectName in planets) {
+                targetObject = planets[objectName];
+            } else if (objectName in probes) {
+                targetObject = probes[objectName];
+            }
+
+            if (targetObject) {
+                const position = new THREE.Vector3();
+                targetObject.getWorldPosition(position);
+                
+                // Calculate appropriate distance based on object size
+                const objectRadius = targetObject.geometry.parameters.radius || 1;
+                const desiredDistance = objectRadius * 20;
+                
+                // Smoothly animate camera
+                const startPosition = camera.position.clone();
+                const endPosition = position.clone().add(new THREE.Vector3(desiredDistance, desiredDistance, desiredDistance));
+                
+                const animate = (progress) => {
+                    if (progress >= 1) {
+                        camera.position.copy(endPosition);
+                        camera.lookAt(position);
+                        return;
+                    }
+                    
+                    // Smooth easing
+                    const easedProgress = 1 - Math.pow(1 - progress, 3);
+                    
+                    camera.position.lerpVectors(startPosition, endPosition, easedProgress);
+                    camera.lookAt(position);
+                    
+                    requestAnimationFrame(() => animate(progress + 0.02));
+                };
+                
+                animate(0);
+            }
+        };
+
+        // Add dropdown event listener
+        document.getElementById('objectSelect').addEventListener('change', (e) => {
+            if (e.target.value) {
+                focusOnObject(e.target.value);
+            }
+        });
+
         let time = 0;
         const timeSpeedSlider = document.getElementById('timeSpeed');
         const timeSpeedValue = document.getElementById('timeSpeedValue');
@@ -394,7 +482,7 @@
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
-            const allClickableObjects = [sun, asteroidBelt, kuiperBelt, ...Object.values(planets), ...Object.values(probes)];
+            const allClickableObjects = [sun, asteroidBelt, kuiperBelt, ...Object.values(planets), ...Object.values(probes), ...Object.values(orbits)];
             const intersects = raycaster.intersectObjects(allClickableObjects);
 
             if (intersects.length > 0) {
