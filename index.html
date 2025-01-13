@@ -553,13 +553,35 @@ const asteroids = createAsteroidBelt();
             const orbitGeometry = new THREE.BufferGeometry();
             const orbitPoints = [];
             const segments = 128;
-            
+    
+            // Adding orbital eccentricity
+            const eccentricities = {
+                Mercury: 0.206,
+                Venus: 0.007,
+                Earth: 0.017,
+                Mars: 0.093,
+                Jupiter: 0.048,
+                Saturn: 0.054,
+                Uranus: 0.047,
+                Neptune: 0.009,
+                Pluto: 0.248,
+                Ceres: 0.076,
+                Eris: 0.442,
+                Haumea: 0.195,
+                Makemake: 0.159
+            };
+
+            const e = eccentricities[name] || 0;
+            const a = data.distance;  // semi-major axis
+            const b = a * Math.sqrt(1 - e*e);  // semi-minor axis
+    
             for (let i = 0; i <= segments; i++) {
                 const theta = (i / segments) * Math.PI * 2;
+                const r = (a * (1 - e*e)) / (1 + e * Math.cos(theta));
                 orbitPoints.push(
-                    Math.cos(theta) * data.distance,
+                    r * Math.cos(theta),
                     0,
-                    Math.sin(theta) * data.distance
+                    r * Math.sin(theta)
                 );
             }
             
