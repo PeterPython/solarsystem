@@ -181,6 +181,17 @@ function createGasGiantTexture(baseColor) {
         Moons: Gray Orbits
     </div>
     <script>
+    <script>
+    // Add these scaling functions first
+    function getScaledDistance(au) {
+        return 20 * Math.log(au * 50 + 1);
+    }
+
+    function getScaledSize(diameter) {
+        // diameter in km
+        return 0.8 * Math.log(diameter/100 + 1);
+    }
+   
     // Initialize Three.js scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000);
@@ -190,7 +201,7 @@ function createGasGiantTexture(baseColor) {
     document.body.appendChild(renderer.domElement);
 
     // Initial camera setup
-    camera.position.set(200, 100, 200);
+    camera.position.set(150, 75, 150);
     camera.lookAt(0, 0, 0);
 
     // Lighting
@@ -201,7 +212,7 @@ function createGasGiantTexture(baseColor) {
     scene.add(sunLight);
 
     // Create Sun
-    const sunGeometry = new THREE.SphereGeometry(8, 32, 32);
+    const sunGeometry = new THREE.SphereGeometry(getScaledSize(1392700), 32, 32);
     const sunMaterial = new THREE.MeshBasicMaterial({
         color: 0xffff00,
         emissive: 0xffff00,
@@ -216,8 +227,8 @@ function createGasGiantTexture(baseColor) {
 // Create asteroid belt
 function createAsteroidBelt() {
     const asteroidCount = 2000;
-    const minRadius = 55;  // Just after Mars (~2.2 AU * 20)
-    const maxRadius = 95;  // Before Jupiter (~3.2 AU * 20)
+    const minRadius = getScaledDistance(2.2);  // Inner edge of asteroid belt
+    const maxRadius = getScaledDistance(3.2);  // Outer edge of asteroid belt
     const asteroidSystem = new THREE.Object3D();
     const asteroids = [];
 
@@ -261,236 +272,235 @@ function createAsteroidBelt() {
 // Create the belt and store asteroid references
 const asteroids = createAsteroidBelt();
     // Define all celestial data including planets, moons, and dwarf planets
-    const celestialData = {
-        Mercury: {
-            radius: 0.8,
-            distance: 7.74,
-            period: 88,
-            color: 0x8c8c8c,
-            orbitColor: 0x4169e1,
-            info: "Mercury - Innermost Planet<br>• Distance: 0.387 AU<br>• Diameter: 4,879 km<br>• Fun fact: Despite being closest to Sun, not the hottest"
-        },
-        Venus: {
-            radius: 1.5,
-            distance: 14.46,
-            period: 225,
-            color: 0xffd700,
-            orbitColor: 0x4169e1,
-            info: "Venus - The Hot Planet<br>• Distance: 0.723 AU<br>• Diameter: 12,104 km<br>• Fun fact: Rotates backwards"
-        },
-        Earth: {
-            radius: 1.6,
-            distance: 20,
-            period: 365,
-            color: 0x4169e1,
-            orbitColor: 0x4169e1,
-            info: "Earth - Our Home<br>• Distance: 1.0 AU<br>• Diameter: 12,742 km<br>• Fun fact: Only known planet with life",
-            moons: {
-                "Earth-Moon": {
-                    radius: 0.4,
-                    distance: 3,
-                    period: 27.3,
-                    color: 0xcccccc,
-                    orbitColor: 0x666666,
-                    info: "Moon - Earth's Only Natural Satellite<br>• Distance: 384,400 km<br>• Diameter: 3,475 km<br>• Fun fact: Same side always faces Earth"
-                }
+    Mercury: {
+        radius: getScaledSize(4879),
+        distance: getScaledDistance(0.387),
+        period: 88,
+        color: 0x8c8c8c,
+        orbitColor: 0x4169e1,
+        info: "Mercury - Innermost Planet<br>• Distance: 0.387 AU<br>• Diameter: 4,879 km<br>• Fun fact: Despite being closest to Sun, not the hottest"
+    },
+    Venus: {
+        radius: getScaledSize(12104),
+        distance: getScaledDistance(0.723),
+        period: 225,
+        color: 0xffd700,
+        orbitColor: 0x4169e1,
+        info: "Venus - The Hot Planet<br>• Distance: 0.723 AU<br>• Diameter: 12,104 km<br>• Fun fact: Rotates backwards"
+    },
+    Earth: {
+        radius: getScaledSize(12742),
+        distance: getScaledDistance(1.0),
+        period: 365,
+        color: 0x4169e1,
+        orbitColor: 0x4169e1,
+        info: "Earth - Our Home<br>• Distance: 1.0 AU<br>• Diameter: 12,742 km<br>• Fun fact: Only known planet with life",
+        moons: {
+            "Earth-Moon": {
+                radius: getScaledSize(3475),
+                distance: getScaledDistance(0.002573),
+                period: 27.3,
+                color: 0xcccccc,
+                orbitColor: 0x666666,
+                info: "Moon - Earth's Only Natural Satellite<br>• Distance: 384,400 km<br>• Diameter: 3,475 km<br>• Fun fact: Same side always faces Earth"
             }
-        },
-        Mars: {
-            radius: 1.2,
-            distance: 30.48,
-            period: 687,
-            color: 0xff4500,
-            orbitColor: 0x4169e1,
-            info: "Mars - The Red Planet<br>• Distance: 1.524 AU<br>• Diameter: 6,779 km<br>• Fun fact: Has the largest known volcano",
-            moons: {
-                "Mars-Phobos": {
-                    radius: 0.2,
-                    distance: 2,
-                    period: 0.3,
-                    color: 0x8b4513,
-                    orbitColor: 0x666666,
-                    info: "Phobos - Mars's Larger Moon<br>• Distance: 9,377 km<br>• Diameter: 22.2 km<br>• Fun fact: Getting closer to Mars each year"
-                },
-                "Mars-Deimos": {
-                    radius: 0.15,
-                    distance: 2.5,
-                    period: 1.2,
-                    color: 0x8b4513,
-                    orbitColor: 0x666666,
-                    info: "Deimos - Mars's Smaller Moon<br>• Distance: 23,460 km<br>• Diameter: 12.6 km<br>• Fun fact: Takes 30 hours to orbit Mars"
-                }
+        }
+    },
+    Mars: {
+        radius: getScaledSize(6779),
+        distance: getScaledDistance(1.524),
+        period: 687,
+        color: 0xff4500,
+        orbitColor: 0x4169e1,
+        info: "Mars - The Red Planet<br>• Distance: 1.524 AU<br>• Diameter: 6,779 km<br>• Fun fact: Has the largest known volcano",
+        moons: {
+            "Mars-Phobos": {
+                radius: getScaledSize(22.2),
+                distance: getScaledDistance(0.00006),
+                period: 0.3,
+                color: 0x8b4513,
+                orbitColor: 0x666666,
+                info: "Phobos - Mars's Larger Moon<br>• Distance: 9,377 km<br>• Diameter: 22.2 km<br>• Fun fact: Getting closer to Mars each year"
+            },
+            "Mars-Deimos": {
+                radius: getScaledSize(12.6),
+                distance: getScaledDistance(0.00015),
+                period: 1.2,
+                color: 0x8b4513,
+                orbitColor: 0x666666,
+                info: "Deimos - Mars's Smaller Moon<br>• Distance: 23,460 km<br>• Diameter: 12.6 km<br>• Fun fact: Takes 30 hours to orbit Mars"
             }
-        },
-        Jupiter: {
-            radius: 4.0,
-            distance: 104.06,
-            period: 4333,
-            color: 0xffa500,
-            orbitColor: 0xffd700,
-            info: "Jupiter - The Giant<br>• Distance: 5.203 AU<br>• Diameter: 139,820 km<br>• Fun fact: Has a permanent storm larger than Earth",
-            moons: {
-                "Jupiter-Io": {
-                    radius: 0.5,
-                    distance: 5,
-                    period: 1.8,
-                    color: 0xfffacd,
-                    orbitColor: 0x666666,
-                    info: "Io - Most Volcanic Moon<br>• Distance: 421,700 km<br>• Diameter: 3,642 km<br>• Fun fact: Has over 400 active volcanoes"
-                },
-                "Jupiter-Europa": {
-                    radius: 0.45,
-                    distance: 6,
-                    period: 3.5,
-                    color: 0xf5f5dc,
-                    orbitColor: 0x666666,
-                    info: "Europa - Ice Moon<br>• Distance: 670,900 km<br>• Diameter: 3,122 km<br>• Fun fact: Has a subsurface ocean"
-                },
-                "Jupiter-Ganymede": {
-                    radius: 0.7,
-                    distance: 7,
-                    period: 7.2,
-                    color: 0xd3d3d3,
-                    orbitColor: 0x666666,
-                    info: "Ganymede - Largest Moon<br>• Distance: 1,070,400 km<br>• Diameter: 5,268 km<br>• Fun fact: Larger than Mercury"
-                },
-                "Jupiter-Callisto": {
-                    radius: 0.65,
-                    distance: 8,
-                    period: 16.7,
-                    color: 0x808080,
-                    orbitColor: 0x666666,
-                    info: "Callisto - Heavily Cratered Moon<br>• Distance: 1,882,700 km<br>• Diameter: 4,821 km<br>• Fun fact: Most heavily cratered object in solar system"
-                }
+        }
+    },
+    Jupiter: {
+        radius: getScaledSize(139820),
+        distance: getScaledDistance(5.203),
+        period: 4333,
+        color: 0xffa500,
+        orbitColor: 0xffd700,
+        info: "Jupiter - The Giant<br>• Distance: 5.203 AU<br>• Diameter: 139,820 km<br>• Fun fact: Has a permanent storm larger than Earth",
+        moons: {
+            "Jupiter-Io": {
+                radius: getScaledSize(3642),
+                distance: getScaledDistance(0.002819),
+                period: 1.8,
+                color: 0xfffacd,
+                orbitColor: 0x666666,
+                info: "Io - Most Volcanic Moon<br>• Distance: 421,700 km<br>• Diameter: 3,642 km<br>• Fun fact: Has over 400 active volcanoes"
+            },
+            "Jupiter-Europa": {
+                radius: getScaledSize(3122),
+                distance: getScaledDistance(0.004485),
+                period: 3.5,
+                color: 0xf5f5dc,
+                orbitColor: 0x666666,
+                info: "Europa - Ice Moon<br>• Distance: 670,900 km<br>• Diameter: 3,122 km<br>• Fun fact: Has a subsurface ocean"
+            },
+            "Jupiter-Ganymede": {
+                radius: getScaledSize(5268),
+                distance: getScaledDistance(0.007155),
+                period: 7.2,
+                color: 0xd3d3d3,
+                orbitColor: 0x666666,
+                info: "Ganymede - Largest Moon<br>• Distance: 1,070,400 km<br>• Diameter: 5,268 km<br>• Fun fact: Larger than Mercury"
+            },
+            "Jupiter-Callisto": {
+                radius: getScaledSize(4821),
+                distance: getScaledDistance(0.012585),
+                period: 16.7,
+                color: 0x808080,
+                orbitColor: 0x666666,
+                info: "Callisto - Heavily Cratered Moon<br>• Distance: 1,882,700 km<br>• Diameter: 4,821 km<br>• Fun fact: Most heavily cratered object in solar system"
             }
-        },
-        Saturn: {
-            radius: 3.5,
-            distance: 190.74,
-            period: 10759,
-            color: 0xffd700,
-            orbitColor: 0xffd700,
-            info: "Saturn - The Ringed Planet<br>• Distance: 9.537 AU<br>• Diameter: 116,460 km<br>• Fun fact: Could float in a giant bathtub",
-            moons: {
-                "Saturn-Titan": {
-                    radius: 0.8,
-                    distance: 9,
-                    period: 15.9,
-                    color: 0xd2b48c,
-                    orbitColor: 0x666666,
-                    info: "Titan - Largest Saturn Moon<br>• Distance: 1,221,870 km<br>• Diameter: 5,150 km<br>• Fun fact: Only moon with thick atmosphere"
-                },
-                "Saturn-Enceladus": {
-                    radius: 0.3,
-                    distance: 6,
-                    period: 1.4,
-                    color: 0xfffafa,
-                    orbitColor: 0x666666,
-                    info: "Enceladus - Ice Geyser Moon<br>• Distance: 238,020 km<br>• Diameter: 504 km<br>• Fun fact: Has ice geysers at south pole"
-                }
+        }
+    },
+    Saturn: {
+        radius: getScaledSize(116460),
+        distance: getScaledDistance(9.537),
+        period: 10759,
+        color: 0xffd700,
+        orbitColor: 0xffd700,
+        info: "Saturn - The Ringed Planet<br>• Distance: 9.537 AU<br>• Diameter: 116,460 km<br>• Fun fact: Could float in a giant bathtub",
+        moons: {
+            "Saturn-Titan": {
+                radius: getScaledSize(5150),
+                distance: getScaledDistance(0.008168),
+                period: 15.9,
+                color: 0xd2b48c,
+                orbitColor: 0x666666,
+                info: "Titan - Largest Saturn Moon<br>• Distance: 1,221,870 km<br>• Diameter: 5,150 km<br>• Fun fact: Only moon with thick atmosphere"
+            },
+            "Saturn-Enceladus": {
+                radius: getScaledSize(504),
+                distance: getScaledDistance(0.001591),
+                period: 1.4,
+                color: 0xfffafa,
+                orbitColor: 0x666666,
+                info: "Enceladus - Ice Geyser Moon<br>• Distance: 238,020 km<br>• Diameter: 504 km<br>• Fun fact: Has ice geysers at south pole"
             }
-        },
-        Uranus: {
-            radius: 3.0,
-            distance: 383.82,
-            period: 30687,
-            color: 0x40e0d0,
-            orbitColor: 0xffd700,
-            info: "Uranus - The Sideways Planet<br>• Distance: 19.191 AU<br>• Diameter: 50,724 km<br>• Fun fact: Rotates on its side",
-            moons: {
-                "Uranus-Titania": {
-                    radius: 0.4,
-                    distance: 5,
-                    period: 8.7,
-                    color: 0xa9a9a9,
-                    orbitColor: 0x666666,
-                    info: "Titania - Largest Uranus Moon<br>• Distance: 435,910 km<br>• Diameter: 1,578 km<br>• Fun fact: Has a system of canyons"
-                }
+        }
+    },
+    Uranus: {
+        radius: getScaledSize(50724),
+        distance: getScaledDistance(19.191),
+        period: 30687,
+        color: 0x40e0d0,
+        orbitColor: 0xffd700,
+        info: "Uranus - The Sideways Planet<br>• Distance: 19.191 AU<br>• Diameter: 50,724 km<br>• Fun fact: Rotates on its side",
+        moons: {
+            "Uranus-Titania": {
+                radius: getScaledSize(1578),
+                distance: getScaledDistance(0.002914),
+                period: 8.7,
+                color: 0xa9a9a9,
+                orbitColor: 0x666666,
+                info: "Titania - Largest Uranus Moon<br>• Distance: 435,910 km<br>• Diameter: 1,578 km<br>• Fun fact: Has a system of canyons"
             }
-        },
-        Neptune: {
-            radius: 3.0,
-            distance: 601.38,
-            period: 60190,
-            color: 0x0000ff,
-            orbitColor: 0xffd700,
-            info: "Neptune - The Windy Planet<br>• Distance: 30.069 AU<br>• Diameter: 49,244 km<br>• Fun fact: Fastest winds in the solar system",
-            moons: {
-                "Neptune-Triton": {
-                    radius: 0.5,
-                    distance: 6,
-                    period: -5.9,
-                    color: 0xe6e6fa,
-                    orbitColor: 0x666666,
-                    info: "Triton - Backwards Moon<br>• Distance: 354,760 km<br>• Diameter: 2,707 km<br>• Fun fact: Orbits backwards around Neptune"
-                }
+        }
+    },
+    Neptune: {
+        radius: getScaledSize(49244),
+        distance: getScaledDistance(30.069),
+        period: 60190,
+        color: 0x0000ff,
+        orbitColor: 0xffd700,
+        info: "Neptune - The Windy Planet<br>• Distance: 30.069 AU<br>• Diameter: 49,244 km<br>• Fun fact: Fastest winds in the solar system",
+        moons: {
+            "Neptune-Triton": {
+                radius: getScaledSize(2707),
+                distance: getScaledDistance(0.002371),
+                period: -5.9,
+                color: 0xe6e6fa,
+                orbitColor: 0x666666,
+                info: "Triton - Backwards Moon<br>• Distance: 354,760 km<br>• Diameter: 2,707 km<br>• Fun fact: Orbits backwards around Neptune"
             }
-        },
-        Pluto: {
-            radius: 0.4,
-            distance: 789.64,
-            period: 90560,
-            color: 0xd3d3d3,
-            orbitColor: 0xffffff,
-            info: "Pluto - Dwarf Planet<br>• Distance: 39.482 AU<br>• Diameter: 2,377 km<br>• Fun fact: Was classified as a planet until 2006"
-        },
-        Ceres: {
-            radius: 0.3,
-            distance: 55.32,
-            period: 1682,
-            color: 0x8b8989,
-            orbitColor: 0xffffff,
-            info: "Ceres - Largest Asteroid<br>• Distance: 2.766 AU<br>• Diameter: 940 km<br>• Fun fact: Contains 25% of all asteroid belt mass"
-        },
-        Eris: {
-            radius: 0.4,
-            distance: 1355.62,
-            period: 203830,
-            color: 0xe8e8e8,
-            orbitColor: 0xffffff,
-            info: "Eris - Most Massive Dwarf Planet<br>• Distance: 67.781 AU<br>• Diameter: 2,326 km<br>• Fun fact: Has a moon named Dysnomia"
-        },
-        Haumea: {
-            radius: 0.3,
-            distance: 866.7,
-            period: 104025,
-            color: 0xe0e0e0,
-            orbitColor: 0xffffff,
-            info: "Haumea - Fast Spinning Dwarf Planet<br>• Distance: 43.335 AU<br>• Diameter: ~1,632 km<br>• Fun fact: Rotates once every 4 hours, making it one of the fastest rotating large bodies in the solar system",
-            moons: {
-                "Haumea-Hiiaka": {
-                    radius: 0.1,
-                    distance: 2,
-                    period: 49.1,
-                    color: 0xcccccc,
-                    orbitColor: 0x666666,
-                    info: "Hi'iaka - Haumea's Larger Moon<br>• Distance: ~49,880 km<br>• Diameter: ~310 km<br>• Fun fact: Named after Hawaiian goddess of dance"
-                },
-                "Haumea-Namaka": {
-                    radius: 0.08,
-                    distance: 1.5,
-                    period: 34.7,
-                    color: 0xcccccc,
-                    orbitColor: 0x666666,
-                    info: "Namaka - Haumea's Smaller Moon<br>• Distance: ~39,300 km<br>• Diameter: ~170 km<br>• Fun fact: Named after Hawaiian water spirit"
-                }
+        }
+    },
+    Pluto: {
+        radius: getScaledSize(2377),
+        distance: getScaledDistance(39.482),
+        period: 90560,
+        color: 0xd3d3d3,
+        orbitColor: 0xffffff,
+        info: "Pluto - Dwarf Planet<br>• Distance: 39.482 AU<br>• Diameter: 2,377 km<br>• Fun fact: Was classified as a planet until 2006"
+    },
+    Ceres: {
+        radius: getScaledSize(940),
+        distance: getScaledDistance(2.766),
+        period: 1682,
+        color: 0x8b8989,
+        orbitColor: 0xffffff,
+        info: "Ceres - Largest Asteroid<br>• Distance: 2.766 AU<br>• Diameter: 940 km<br>• Fun fact: Contains 25% of all asteroid belt mass"
+    },
+    Eris: {
+        radius: getScaledSize(2326),
+        distance: getScaledDistance(67.781),
+        period: 203830,
+        color: 0xe8e8e8,
+        orbitColor: 0xffffff,
+        info: "Eris - Most Massive Dwarf Planet<br>• Distance: 67.781 AU<br>• Diameter: 2,326 km<br>• Fun fact: Has a moon named Dysnomia"
+    },
+    Haumea: {
+        radius: getScaledSize(1632),
+        distance: getScaledDistance(43.335),
+        period: 104025,
+        color: 0xe0e0e0,
+        orbitColor: 0xffffff,
+        info: "Haumea - Fast Spinning Dwarf Planet<br>• Distance: 43.335 AU<br>• Diameter: ~1,632 km<br>• Fun fact: Rotates once every 4 hours",
+        moons: {
+            "Haumea-Hiiaka": {
+                radius: getScaledSize(310),
+                distance: getScaledDistance(0.00033),
+                period: 49.1,
+                color: 0xcccccc,
+                orbitColor: 0x666666,
+                info: "Hi'iaka - Haumea's Larger Moon<br>• Distance: ~49,880 km<br>• Diameter: ~310 km"
+            },
+            "Haumea-Namaka": {
+                radius: getScaledSize(170),
+                distance: getScaledDistance(0.00026),
+                period: 34.7,
+                color: 0xcccccc,
+                orbitColor: 0x666666,
+                info: "Namaka - Haumea's Smaller Moon<br>• Distance: ~39,300 km<br>• Diameter: ~170 km"
             }
-        },
-        Makemake: {
-            radius: 0.35,
-            distance: 915.82,
-            period: 111690,
-            color: 0xf0e68c,
-            orbitColor: 0xffffff,
-            info: "Makemake - Bright Dwarf Planet<br>• Distance: 45.791 AU<br>• Diameter: ~1,430 km<br>• Fun fact: Named after the creator deity of the Rapa Nui people of Easter Island",
-            moons: {
-                "Makemake-MK2": {
-                    radius: 0.1,
-                    distance: 1.5,
-                    period: 12.4,
-                    color: 0xcccccc,
-                    orbitColor: 0x666666,
-                    info: "S/2015 (136472) 1 - Makemake's Moon<br>• Distance: ~21,000 km<br>• Diameter: ~175 km<br>• Fun fact: Nicknamed MK 2, discovered by Hubble Space Telescope"
+        }
+    },
+    Makemake: {
+        radius: getScaledSize(1430),
+        distance: getScaledDistance(45.791),
+        period: 111690,
+        color: 0xf0e68c,
+        orbitColor: 0xffffff,
+        info: "Makemake - Bright Dwarf Planet<br>• Distance: 45.791 AU<br>• Diameter: ~1,430 km",
+        moons: {
+            "Makemake-MK2": {
+                radius: getScaledSize(175),
+                distance: getScaledDistance(0.00014),
+                period: 12.4,
+                color: 0xcccccc,
+                orbitColor: 0x666666,
+                info: "S/2015 (136472) 1 - Makemake's Moon<br>• Distance: ~21,000 km<br>• Diameter: ~175 km"
                 }
             }
         }
