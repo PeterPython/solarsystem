@@ -533,6 +533,18 @@ const asteroids = createAsteroidBelt();
             }
         });
 
+        // Update asteroid positions
+        asteroids.forEach(asteroid => {
+            const speed = asteroid.userData.orbitSpeed * timeSpeedSlider.value;
+            asteroid.userData.orbitAngle += speed;
+            
+            asteroid.position.x = Math.cos(asteroid.userData.orbitAngle) * asteroid.userData.radius;
+            asteroid.position.z = Math.sin(asteroid.userData.orbitAngle) * asteroid.userData.radius;
+            
+            // Add slight wobble to y position
+            asteroid.position.y += Math.sin(time * 0.001) * 0.001;
+        });
+    
         time += parseFloat(timeSpeedSlider.value);
         renderer.render(scene, camera);
     }
