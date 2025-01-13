@@ -453,12 +453,50 @@ const asteroids = createAsteroidBelt();
     // Create celestial bodies and their moons
     function createCelestialBody(name, data, parentObject = null) {
         const geometry = new THREE.SphereGeometry(data.radius, 32, 32);
-        const material = new THREE.MeshPhongMaterial({
-            color: data.color,
-            emissive: data.color,
-            emissiveIntensity: 0.2
+        let material;
+        if (name === 'Jupiter' || name === 'Saturn' || name === 'Uranus' || name === 'Neptune') {
+            // Gas giants get special texture
+            material = new THREE.MeshPhongMaterial({
+                map: createGasGiantTexture(data.color),
+                emissive: data.color,
+                emissiveIntensity: 0.2,
+                bumpScale: 0.05,
+                shininess: 15
+            });
+        } else if (name === 'Sun') {
+            // Sun gets special glowing material
+            material = new THREE.MeshBasicMaterial({
+                color: data.color,
+                emissive: data.color,
+                emissiveIntensity: 1
         });
-        const body = new THREE.Mesh(geometry, material);
+    } else {
+        // Rocky bodies
+        material = new THREE.MeshPhongMaterial({
+            map: createPlanetTexture(4, 0.7, `#${data.color.toString(16).padStart(6, '0')}`),
+            emissive: data.color,
+            emissiveIntensity: 0.2,
+            bumpScale: 0.05,
+            shininess: 20
+    });
+}
+const body = new THREE.Mesh(geometry, material);
+
+        if (name === 'Saturn') {
+    // Add rings
+    const ringGeometry = new THREE.RingGeometry(5, 8, 64);
+    const ringMaterial = new THREE.MeshPhongMaterial({
+        color: 0xb7b7b7,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.6,
+        map: createPlanetTexture(2, 0.9, '#b7b7b7')
+    });
+    const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+    rings.rotation.x = Math.PI / 2;
+    body.add(rings);
+}
+        
         body.userData = { name: name, info: data.info };
 
         // Create orbit
