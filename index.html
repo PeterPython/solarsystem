@@ -141,43 +141,48 @@ function createAsteroidBelt() {
     const asteroidCount = 2000;
     const minRadius = 35;  // Just outside Mars' orbit
     const maxRadius = 45;  // Just before Jupiter's orbit
-    const asteroidPoints = new THREE.BufferGeometry();
-    const positions = [];
-    const colors = [];
+    const asteroidSystem = new THREE.Object3D();
+    const asteroids = [];
 
     for (let i = 0; i < asteroidCount; i++) {
         // Random radius and angle for each asteroid
         const radius = Math.random() * (maxRadius - minRadius) + minRadius;
         const theta = Math.random() * Math.PI * 2;
         const y = (Math.random() - 0.5) * 2; // Gives some vertical spread
-
-        positions.push(
+        
+        // Create individual asteroid
+        const asteroidGeometry = new THREE.SphereGeometry(0.1, 4, 4);
+        const shade = Math.random() * 0.5 + 0.5;
+        const asteroidMaterial = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(shade, shade, shade),
+            emissive: new THREE.Color(shade/8, shade/8, shade/8)
+        });
+        const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
+        
+        // Set initial position
+        asteroid.position.set(
             Math.cos(theta) * radius,
             y,
             Math.sin(theta) * radius
         );
-
-        // Varying shades of gray for the asteroids
-        const shade = Math.random() * 0.5 + 0.5;
-        colors.push(shade, shade, shade);
+        
+        // Store orbital properties
+        asteroid.userData = {
+            radius: radius,
+            orbitSpeed: (1 / radius) * 0.5, // Closer asteroids move faster
+            orbitAngle: theta
+        };
+        
+        asteroidSystem.add(asteroid);
+        asteroids.push(asteroid);
     }
 
-    asteroidPoints.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    asteroidPoints.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-
-    const asteroidMaterial = new THREE.PointsMaterial({
-        size: 0.5,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.8
-    });
-
-    const asteroidBelt = new THREE.Points(asteroidPoints, asteroidMaterial);
-    scene.add(asteroidBelt);
+    scene.add(asteroidSystem);
+    return asteroids;
 }
 
-// Call the function to create the belt
-createAsteroidBelt();
+// Create the belt and store asteroid references
+const asteroids = createAsteroidBelt();
     // Define all celestial data including planets, moons, and dwarf planets
     const celestialData = {
         Mercury: {
