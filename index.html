@@ -216,8 +216,8 @@ function createGasGiantTexture(baseColor) {
 // Create asteroid belt
 function createAsteroidBelt() {
     const asteroidCount = 2000;
-    const minRadius = 35;  // Just outside Mars' orbit
-    const maxRadius = 45;  // Just before Jupiter's orbit
+    const minRadius = 55;  // Just after Mars (~2.2 AU * 20)
+    const maxRadius = 95;  // Before Jupiter (~3.2 AU * 20)
     const asteroidSystem = new THREE.Object3D();
     const asteroids = [];
 
