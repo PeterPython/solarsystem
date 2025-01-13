@@ -162,6 +162,11 @@ function createGasGiantTexture(baseColor) {
                     <option value="Pluto">Pluto</option>
                     <option value="Ceres">Ceres</option>
                     <option value="Eris">Eris</option>
+                    <option value="Haumea">Haumea</option>
+                    <option value="Haumea-Hiiaka">Hi'iaka (Haumea's Moon)</option>
+                    <option value="Haumea-Namaka">Namaka (Haumea's Moon)</option>
+                    <option value="Makemake">Makemake</option>
+                    <option value="Makemake-MK2">MK 2 (Makemake's Moon)</option>
                 </optgroup>
             </select>
         </div>
@@ -444,6 +449,50 @@ const asteroids = createAsteroidBelt();
             color: 0xe8e8e8,
             orbitColor: 0xffffff,
             info: "Eris - Most Massive Dwarf Planet<br>• Distance: 67.781 AU<br>• Diameter: 2,326 km<br>• Fun fact: Has a moon named Dysnomia"
+        },
+        Haumea: {
+            radius: 0.3,
+            distance: 140,
+            period: 104025,
+            color: 0xe0e0e0,
+            orbitColor: 0xffffff,
+            info: "Haumea - Fast Spinning Dwarf Planet<br>• Distance: 43.335 AU<br>• Diameter: ~1,632 km<br>• Fun fact: Rotates once every 4 hours, making it one of the fastest rotating large bodies in the solar system<br>• Has two known moons: Hi'iaka and Namaka",
+            moons: {
+                "Haumea-Hiiaka": {
+                    radius: 0.1,
+                    distance: 2,
+                    period: 49.1,
+                    color: 0xcccccc,
+                    orbitColor: 0x666666,
+                    info: "Hi'iaka - Haumea's Larger Moon<br>• Distance: ~49,880 km<br>• Diameter: ~310 km<br>• Fun fact: Named after Hawaiian goddess of dance"
+                },
+                "Haumea-Namaka": {
+                    radius: 0.08,
+                    distance: 1.5,
+                    period: 34.7,
+                    color: 0xcccccc,
+                    orbitColor: 0x666666,
+                    info: "Namaka - Haumea's Smaller Moon<br>• Distance: ~39,300 km<br>• Diameter: ~170 km<br>• Fun fact: Named after Hawaiian water spirit"
+                }
+            }
+        },
+        Makemake: {
+            radius: 0.35,
+            distance: 145,
+            period: 111690,
+            color: 0xf0e68c,
+            orbitColor: 0xffffff,
+            info: "Makemake - Bright Dwarf Planet<br>• Distance: 45.791 AU<br>• Diameter: ~1,430 km<br>• Fun fact: Named after the creator deity of the Rapa Nui people of Easter Island<br>• Has a small moon discovered in 2016",
+            moons: {
+                "Makemake-MK2": {
+                    radius: 0.1,
+                    distance: 1.5,
+                    period: 12.4,
+                    color: 0xcccccc,
+                    orbitColor: 0x666666,
+                    info: "S/2015 (136472) 1 - Makemake's Moon<br>• Distance: ~21,000 km<br>• Diameter: ~175 km<br>• Fun fact: Nicknamed MK 2, discovered by Hubble Space Telescope"
+                }
+            }
         }
     };
     const allObjects = {};
