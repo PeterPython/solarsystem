@@ -568,11 +568,37 @@ const asteroids = createAsteroidBelt();
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(Object.values(allObjects));
+        
+        // Add sun to the list of objects to check
+        const allObjectsToCheck = [sun, ...Object.values(allObjects)];
+        
+        // Check for intersections with objects
+        const objectIntersects = raycaster.intersectObjects(allObjectsToCheck);
+        // Check for intersections with orbits
+        const orbitIntersects = raycaster.intersectObjects(Object.values(orbits));
 
-        if (intersects.length > 0) {
-            const object = intersects[0].object;
+        if (objectIntersects.length > 0) {
+            // Clicked on a celestial body (including sun)
+            const object = objectIntersects[0].object;
             planetInfo.innerHTML = object.userData.info;
+        } else if (orbitIntersects.length > 0) {
+            // Clicked on an orbit
+            const orbit = orbitIntersects[0].object;
+            // Find the corresponding celestial body
+            const bodyName = Object.keys(orbits).find(key => orbits[key] === orbit);
+            if (bodyName) {
+                let body;
+                // Check if it's a moon
+                const [parentBody, moonName] = bodyName.split('-');
+                if (moonName) {
+                    body = celestialData[parentBody].moons[bodyName];
+                } else {
+                    body = celestialData[bodyName];
+                }
+                if (body && body.info) {
+                    planetInfo.innerHTML = body.info;
+                }
+            }
         }
     });
 
