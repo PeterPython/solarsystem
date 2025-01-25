@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar System Model</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -17,7 +17,30 @@
         <div class="dropdown-container">
             <label for="objectSelect">Focus on object:</label>
             <select id="objectSelect">
-                <!-- Planet options will be populated by JavaScript -->
+                <option value="">Select an object...</option>
+                <optgroup label="Sun">
+                    <option value="Sun">Sun</option>
+                </optgroup>
+                <optgroup label="Inner Planets & Moons">
+                    <option value="Mercury">Mercury</option>
+                    <option value="Venus">Venus</option>
+                    <option value="Earth">Earth</option>
+                    <option value="Earth-Moon">Earth's Moon</option>
+                    <option value="Mars">Mars</option>
+                    <option value="Mars-Phobos">Phobos</option>
+                    <option value="Mars-Deimos">Deimos</option>
+                </optgroup>
+                <optgroup label="Outer Planets & Major Moons">
+                    <option value="Jupiter">Jupiter</option>
+                    <option value="Saturn">Saturn</option>
+                    <option value="Uranus">Uranus</option>
+                    <option value="Neptune">Neptune</option>
+                </optgroup>
+                <optgroup label="Dwarf Planets">
+                    <option value="Pluto">Pluto</option>
+                    <option value="Ceres">Ceres</option>
+                    <option value="Eris">Eris</option>
+                </optgroup>
             </select>
         </div>
     </div>
@@ -30,6 +53,8 @@
         Dwarf Planets: White Orbits<br>
         Moons: Gray Orbits
     </div>
+    
+    <!-- Add module scripts -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
