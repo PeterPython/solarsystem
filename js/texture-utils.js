@@ -1,5 +1,5 @@
 // texture-utils.js
-import * as THREE from 'three';
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 
 export function createPlanetTexture(detail, roughness, baseColor) {
     const canvas = document.createElement('canvas');
@@ -45,11 +45,7 @@ export function createGasGiantTexture(baseColor) {
     for (let i = 0; i < bands; i++) {
         const y = (i * canvas.height) / bands;
         const height = canvas.height / bands;
-        if (i % 2 === 0) {
-            context.fillStyle = `rgba(255,255,255,0.1)`;
-        } else {
-            context.fillStyle = `rgba(0,0,0,0.1)`;
-        }
+        context.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
         context.fillRect(0, y, canvas.width, height);
     }
 
@@ -60,7 +56,7 @@ export function createGasGiantTexture(baseColor) {
         const radius = Math.random() * 20 + 10;
         context.beginPath();
         context.arc(x, y, radius, 0, Math.PI * 2);
-        context.fillStyle = `rgba(255,255,255,0.05)`;
+        context.fillStyle = 'rgba(255,255,255,0.05)';
         context.fill();
     }
 
