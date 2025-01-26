@@ -1,5 +1,5 @@
 // camera-controls.js
-import * as THREE from '/solarsystem/js/three.module.js';
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 
 export class CameraController {
     constructor(camera) {
