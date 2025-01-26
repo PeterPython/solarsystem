@@ -1,73 +1,112 @@
 // camera-controls.js
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+
 export class CameraController {
     constructor(camera) {
         this.camera = camera;
+        this.target = new THREE.Vector3(0, 0, 0);
         this.isDragging = false;
         this.previousMousePosition = { x: 0, y: 0 };
-        this.cameraAngle = { x: 0, y: 0 };
-        this.cameraDistance = 200;
+        this.spherical = new THREE.Spherical();
+        this.sphericalDelta = new THREE.Spherical();
+        this.scale = 1;
+        this.zoomSpeed = 0.1;
+        this.rotateSpeed = 0.5;
+        this.dampingFactor = 0.05;
         
+        // Initialize spherical coordinates
+        this.updateSphericalFromCamera();
         this.initEventListeners();
     }
 
+    updateSphericalFromCamera() {
+        const offset = new THREE.Vector3();
+        offset.copy(this.camera.position).sub(this.target);
+        this.spherical.setFromVector3(offset);
+    }
+
     initEventListeners() {
-        document.addEventListener('mousedown', this.handleMouseDown.bind(this));
-        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
-        document.addEventListener('wheel', this.handleWheel.bind(this));
+        document.addEventListener('mousedown', this.onMouseDown.bind(this));
+        document.addEventListener('mousemove', this.onMouseMove.bind(this));
+        document.addEventListener('mouseup', this.onMouseUp.bind(this));
+        document.addEventListener('wheel', this.onMouseWheel.bind(this));
     }
 
-    handleMouseDown(e) {
-        this.isDragging = true;
-        this.previousMousePosition = { x: e.clientX, y: e.clientY };
+    onMouseDown(event) {
+        if (event.button === 0) { // Left mouse button
+            this.isDragging = true;
+            this.previousMousePosition.x = event.clientX;
+            this.previousMousePosition.y = event.clientY;
+        }
     }
 
-    handleMouseMove(e) {
+    onMouseMove(event) {
         if (!this.isDragging) return;
 
-        const deltaMove = {
-            x: e.clientX - this.previousMousePosition.x,
-            y: e.clientY - this.previousMousePosition.y
-        };
+        const deltaX = event.clientX - this.previousMousePosition.x;
+        const deltaY = event.clientY - this.previousMousePosition.y;
 
-        this.cameraAngle.x += deltaMove.y * 0.01;
-        this.cameraAngle.y += deltaMove.x * 0.01;
+        this.sphericalDelta.theta -= (deltaX * this.rotateSpeed) / 100;
+        this.sphericalDelta.phi -= (deltaY * this.rotateSpeed) / 100;
 
-        this.cameraAngle.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, this.cameraAngle.x));
-        this.updateCameraPosition();
-        this.previousMousePosition = { x: e.clientX, y: e.clientY };
+        this.previousMousePosition.x = event.clientX;
+        this.previousMousePosition.y = event.clientY;
+
+        this.update();
     }
 
-    handleMouseUp() {
+    onMouseUp() {
         this.isDragging = false;
     }
 
-    handleWheel(e) {
-        this.cameraDistance = Math.max(50, Math.min(1000, this.cameraDistance + e.deltaY * 0.5));
-        this.updateCameraPosition();
+    onMouseWheel(event) {
+        event.preventDefault();
+
+        if (event.deltaY > 0) {
+            this.scale *= (1 + this.zoomSpeed);
+        } else {
+            this.scale /= (1 + this.zoomSpeed);
+        }
+
+        this.scale = Math.max(1, Math.min(this.scale, 100));
+        this.update();
     }
 
-    updateCameraPosition() {
-        const x = this.cameraDistance * Math.cos(this.cameraAngle.x) * Math.sin(this.cameraAngle.y);
-        const y = this.cameraDistance * Math.sin(this.cameraAngle.x);
-        const z = this.cameraDistance * Math.cos(this.cameraAngle.x) * Math.cos(this.cameraAngle.y);
+    update() {
+        // Apply rotation changes
+        this.spherical.theta += this.sphericalDelta.theta * this.dampingFactor;
+        this.spherical.phi += this.sphericalDelta.phi * this.dampingFactor;
 
-        this.camera.position.set(x, y, z);
-        this.camera.lookAt(0, 0, 0);
+        // Restrict phi to avoid going past the poles
+        this.spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.spherical.phi));
+
+        // Apply zoom
+        this.spherical.radius = 200 * this.scale;
+
+        // Convert spherical coordinates back to cartesian
+        const offset = new THREE.Vector3();
+        offset.setFromSpherical(this.spherical);
+
+        // Update camera position and orientation
+        this.camera.position.copy(this.target).add(offset);
+        this.camera.lookAt(this.target);
+
+        // Reset deltas
+        this.sphericalDelta.theta *= (1 - this.dampingFactor);
+        this.sphericalDelta.phi *= (1 - this.dampingFactor);
     }
 
     focusOnObject(position) {
-        this.camera.position.set(
-            position.x + 30,
-            position.y + 30,
-            position.z + 30
-        );
-        this.camera.lookAt(position);
+        this.target.copy(position);
+        this.spherical.radius = 30;
+        this.update();
     }
 
     reset() {
-        this.camera.position.set(200, 100, 200);
-        this.camera.lookAt(0, 0, 0);
+        this.target.set(0, 0, 0);
+        this.scale = 1;
+        this.spherical.set(200, Math.PI/3, 0);
+        this.sphericalDelta.set(0, 0, 0);
+        this.update();
     }
 }
