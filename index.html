@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar System Model</title>
     <link rel="stylesheet" href="styles.css">
-<script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r159/three.module.js"></script>
-<script type="module" src="js/main.js"></script>
-<script type="module" src="js/camera-controls.js"></script>
-
-In</head>
+</head>
 <body>
     <div id="controls">
         <div class="slider-container">
-            <label for="timeSpeed">Time Speed (Earth days/second):</label>
+            <label for="timeSpeed">Time Speed:</label>
             <input type="range" id="timeSpeed" min="0" max="50" step="1" value="1">
             <span id="timeSpeedValue">1</span>
         </div>
@@ -21,29 +17,16 @@ In</head>
             <label for="objectSelect">Focus on object:</label>
             <select id="objectSelect">
                 <option value="">Select an object...</option>
-                <optgroup label="Sun">
-                    <option value="Sun">Sun</option>
-                </optgroup>
-                <optgroup label="Inner Planets & Moons">
-                    <option value="Mercury">Mercury</option>
-                    <option value="Venus">Venus</option>
-                    <option value="Earth">Earth</option>
-                    <option value="Earth-Moon">Earth's Moon</option>
-                    <option value="Mars">Mars</option>
-                    <option value="Mars-Phobos">Phobos</option>
-                    <option value="Mars-Deimos">Deimos</option>
-                </optgroup>
-                <optgroup label="Outer Planets & Major Moons">
-                    <option value="Jupiter">Jupiter</option>
-                    <option value="Saturn">Saturn</option>
-                    <option value="Uranus">Uranus</option>
-                    <option value="Neptune">Neptune</option>
-                </optgroup>
-                <optgroup label="Dwarf Planets">
-                    <option value="Pluto">Pluto</option>
-                    <option value="Ceres">Ceres</option>
-                    <option value="Eris">Eris</option>
-                </optgroup>
+                <option value="Sun">Sun</option>
+                <option value="Mercury">Mercury</option>
+                <option value="Venus">Venus</option>
+                <option value="Earth">Earth</option>
+                <option value="Mars">Mars</option>
+                <option value="Jupiter">Jupiter</option>
+                <option value="Saturn">Saturn</option>
+                <option value="Uranus">Uranus</option>
+                <option value="Neptune">Neptune</option>
+                <option value="Pluto">Pluto</option>
             </select>
         </div>
     </div>
@@ -53,9 +36,9 @@ In</head>
         Inner Planets: Blue Orbits<br>
         Outer Planets: Gold Orbits<br>
         Asteroid Belt: Gray Points<br>
-        Dwarf Planets: White Orbits<br>
-        Moons: Gray Orbits
+        Dwarf Planets: White Orbits
     </div>
-    
+
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
