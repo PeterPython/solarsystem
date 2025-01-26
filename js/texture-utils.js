@@ -1,5 +1,5 @@
 // texture-utils.js
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r159/three.module.js';
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js';
 
 export function createPlanetTexture(detail, roughness, baseColor) {
     const canvas = document.createElement('canvas');
