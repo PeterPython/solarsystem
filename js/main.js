@@ -1,8 +1,8 @@
 // main.js - Updated Solar System Animation
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.module.js';
-import { celestialData } from './celestial-data.js';
-import { createPlanetTexture } from './texture-utils.js';
-import { CameraController } from './camera-controls.js';
+import { celestialData } from './js/celestial-data.js';
+import { createPlanetTexture } from './js/texture-utils.js';
+import { CameraController } from './js/camera-controls.js';
 
 // Setup scene, camera, and renderer
 const scene = new THREE.Scene();
