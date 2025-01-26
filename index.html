@@ -3,32 +3,58 @@
 <head>
     <title>Three.js Test</title>
     <script src="https://unpkg.com/three@0.159.0/build/three.js"></script>
+    <style>
+        body { 
+            background-color: black; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+        }
+    </style>
 </head>
 <body>
-    <div id="error"></div>
+    <div id="debug"></div>
     <script>
+        function log(message) {
+            const debugEl = document.getElementById('debug');
+            debugEl.innerHTML += message + '<br>';
+            console.log(message);
+        }
+
         try {
+            log('Starting script');
+            
             if (typeof THREE === 'undefined') {
-                document.getElementById('error').innerText = 'Three.js not loaded';
+                log('THREE is undefined');
             } else {
+                log('THREE is defined');
+                
                 const scene = new THREE.Scene();
+                log('Scene created');
+                
                 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                log('Camera created');
+                
                 const renderer = new THREE.WebGLRenderer();
+                log('Renderer created');
                 
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 document.body.appendChild(renderer.domElement);
+                log('Renderer added to body');
                 
                 const geometry = new THREE.BoxGeometry();
                 const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
                 const cube = new THREE.Mesh(geometry, material);
                 scene.add(cube);
+                log('Cube added to scene');
                 
                 camera.position.z = 5;
+                log('Camera positioned');
                 
                 renderer.render(scene, camera);
+                log('Scene rendered');
             }
         } catch (error) {
-            document.getElementById('error').innerText = 'Error: ' + error.message;
+            log('Error: ' + error.message);
         }
     </script>
 </body>
