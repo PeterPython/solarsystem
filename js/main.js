@@ -1,7 +1,7 @@
 // main.js
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-import { createPlanetTexture, createGasGiantTexture } from '/solarsystem/js/texture-utils.js';
-import { celestialData, sunData } from '/solarsystem/js/celestial-data.js';
+import { createPlanetTexture, createGasGiantTexture } from './texture-utils.js';
+import { celestialData, sunData } from './celestial-data.js';
 
 let scene, camera, renderer;
 let allObjects = {};
