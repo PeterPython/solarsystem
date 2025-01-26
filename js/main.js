@@ -17,6 +17,8 @@ function init() {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000);
     camera.position.set(200, 100, 200);
     camera.lookAt(0, 0, 0);
+    import { CameraController } from './camera-controls.js';
+    const cameraController = new CameraController(camera);
     
     // Set up renderer
     renderer = new THREE.WebGLRenderer({ antialias: true });
