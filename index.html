@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Debugging Three.js</title>
-    <style>body { margin: 0; }</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r159/three.js"></script>
 </head>
 <body>
-    <script type="module">
-        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r159/three.module.js';
-        
+    <script>
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
