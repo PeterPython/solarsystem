@@ -1,5 +1,5 @@
 // main.js
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r159/three.module.js';
 import { createPlanetTexture, createGasGiantTexture } from './texture-utils.js';
 import { celestialData, sunData } from './celestial-data.js';
 import { CameraController } from './camera-controls.js';
