@@ -1,5 +1,5 @@
 // celestial-data.js
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js';
+import * as THREE from './three.module.js';
 
 export const sunData = {
     radius: 8,
