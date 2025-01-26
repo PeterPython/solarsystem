@@ -2,12 +2,15 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 import { createPlanetTexture, createGasGiantTexture } from './texture-utils.js';
 import { celestialData, sunData } from './celestial-data.js';
+import { CameraController } from './camera-controls.js';
+
 
 let scene, camera, renderer;
 let allObjects = {};
 let orbits = {};
 let asteroids = [];
 let time = 0;
+let cameraController;
 
 function init() {
     // Create scene
@@ -17,7 +20,6 @@ function init() {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000);
     camera.position.set(200, 100, 200);
     camera.lookAt(0, 0, 0);
-    import { CameraController } from './camera-controls.js';
     const cameraController = new CameraController(camera);
     
     // Set up renderer
@@ -192,6 +194,8 @@ function setupControls() {
 
 function animate() {
     requestAnimationFrame(animate);
+    cameraController.update();
+
 
     const timeSpeed = parseFloat(document.getElementById('timeSpeed').value);
 
