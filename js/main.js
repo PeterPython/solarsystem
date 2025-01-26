@@ -1,5 +1,5 @@
 // main.js - Updated Solar System Animation
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.module.js';
+import * as THREE from './three.module.js';
 import { celestialData } from './celestial-data.js';
 import { createPlanetTexture } from './texture-utils.js';
 import { CameraController } from './camera-controls.js';
