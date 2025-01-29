@@ -4,32 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar System Model</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./styles.css"> <!-- Reference to styles.css -->
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: black; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+        #planetInfo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
     <div id="controls">
-        <div class="slider-container">
-            <label for="timeSpeed">Time Speed (Earth days/second):</label>
-            <input type="range" id="timeSpeed" min="0" max="50" step="1" value="1">
-            <span id="timeSpeedValue">1</span>
-        </div>
-        <div class="dropdown-container">
-            <label for="objectSelect">Focus on object:</label>
-            <select id="objectSelect">
-                <!-- Planet options will be populated by JavaScript -->
-            </select>
-        </div>
+        <label for="timeSpeed">Time Speed:</label>
+        <input type="range" id="timeSpeed" min="0" max="50" step="1" value="1">
     </div>
     <div id="planetInfo">Click on a celestial body to see its information</div>
-    <div id="legend">
-        Sun: Yellow<br>
-        Inner Planets: Blue Orbits<br>
-        Outer Planets: Gold Orbits<br>
-        Asteroid Belt: Gray Points<br>
-        Dwarf Planets: White Orbits<br>
-        Moons: Gray Orbits
-    </div>
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="./js/main.js"></script> <!-- Correct JavaScript reference -->
 </body>
 </html>
